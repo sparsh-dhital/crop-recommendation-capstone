@@ -1,7 +1,7 @@
 {
   "rewrites": [
-    {"source": "/api/:path*", "destination": "https://YOUR-RENDER-SERVICE.onrender.com/api/:path*"},
-    {"source": "/predict", "destination": "https://YOUR-RENDER-SERVICE.onrender.com/predict"},
+    {"source": "/api/:path*", "destination": "https://crop-recommendation-capstone-api.onrender.com/api/:path*"},
+    {"source": "/predict", "destination": "https://crop-recommendation-capstone-api.onrender.com/predict"},
     {"source": "/login", "destination": "/index.html"}
   ],
   "headers": [{"source": "/(.*)", "headers": [{"key": "Cache-Control", "value": "no-store"}]}]
