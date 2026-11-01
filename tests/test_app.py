@@ -192,6 +192,10 @@ def test_static_asset_routes(client):
     assert fav_svg.status_code == 200
     assert 'image/svg+xml' in fav_svg.headers['Content-Type']
 
+    fav_png = client.get('/favicon.png')
+    assert fav_png.status_code == 200
+    assert 'image/png' in fav_png.headers['Content-Type']
+
 
 def test_health_and_security_headers(client):
     """Verify health endpoint and security headers on responses."""

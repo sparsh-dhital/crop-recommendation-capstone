@@ -273,11 +273,18 @@ def create_app(test_config=None):
 
     @app.get('/favicon.ico')
     def favicon_ico():
-        return send_from_directory(BASE_DIR.parent / 'frontend' / 'static', 'favicon.ico', mimetype='image/x-icon')
+        folder = BASE_DIR.parent / 'frontend' if (BASE_DIR.parent / 'frontend' / 'favicon.ico').is_file() else BASE_DIR.parent / 'frontend' / 'static'
+        return send_from_directory(folder, 'favicon.ico', mimetype='image/x-icon')
 
     @app.get('/favicon.svg')
     def favicon_svg():
-        return send_from_directory(BASE_DIR.parent / 'frontend' / 'static', 'favicon.svg', mimetype='image/svg+xml')
+        folder = BASE_DIR.parent / 'frontend' if (BASE_DIR.parent / 'frontend' / 'favicon.svg').is_file() else BASE_DIR.parent / 'frontend' / 'static'
+        return send_from_directory(folder, 'favicon.svg', mimetype='image/svg+xml')
+
+    @app.get('/favicon.png')
+    def favicon_png():
+        folder = BASE_DIR.parent / 'frontend' if (BASE_DIR.parent / 'frontend' / 'favicon.png').is_file() else BASE_DIR.parent / 'frontend' / 'static'
+        return send_from_directory(folder, 'favicon.png', mimetype='image/png')
 
     @app.get('/health')
     def health():

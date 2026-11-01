@@ -4,5 +4,24 @@
     {"source": "/predict", "destination": "https://crop-recommendation-capstone-api.onrender.com/predict"},
     {"source": "/login", "destination": "/index.html"}
   ],
-  "headers": [{"source": "/(.*)", "headers": [{"key": "Cache-Control", "value": "no-store"}]}]
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store"}
+      ]
+    },
+    {
+      "source": "/favicon:path*",
+      "headers": [
+        {"key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800"}
+      ]
+    },
+    {
+      "source": "/static/:path*",
+      "headers": [
+        {"key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800"}
+      ]
+    }
+  ]
 }
