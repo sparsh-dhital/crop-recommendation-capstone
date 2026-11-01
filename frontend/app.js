@@ -95,7 +95,14 @@ function toggleTheme() {
   let current = 0;
   dotsWrap.replaceChildren();
 
+  function loadSlideImage(slide) {
+    if (slide && slide.dataset.bg && !slide.style.backgroundImage) {
+      slide.style.backgroundImage = `url('${slide.dataset.bg}')`;
+    }
+  }
+
   function goToSlide(index) {
+    loadSlideImage(slides[index]);
     slides[current].classList.remove('active');
     const prevBtn = dotsWrap.children[current];
     if (prevBtn) {
@@ -121,9 +128,21 @@ function toggleTheme() {
     dotsWrap.appendChild(btn);
   });
 
+  // Non-blocking deferred background loading during browser idle time
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      slides.forEach((s, idx) => { if (idx > 0) loadSlideImage(s); });
+    });
+  } else {
+    setTimeout(() => {
+      slides.forEach((s, idx) => { if (idx > 0) loadSlideImage(s); });
+    }, 2000);
+  }
+
   const prefersReducedMotion = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!prefersReducedMotion) {
     setInterval(() => {
+      if (document.hidden) return; // Prevent CPU/GPU churn when browser tab is inactive
       goToSlide((current + 1) % slides.length);
     }, 6000);
   }

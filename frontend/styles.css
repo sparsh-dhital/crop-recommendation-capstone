@@ -27,11 +27,11 @@
   --glass-card-shine: rgba(255, 255, 255, 0.95);
   --glass-card-shadow: 0 20px 48px -10px rgba(6, 78, 59, 0.14), 0 8px 20px -4px rgba(0, 0, 0, 0.05);
   --glass-card-inner: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(16, 185, 129, 0.06);
-  --glass-card-blur: blur(18px) saturate(190%);
+  --glass-card-blur: blur(14px) saturate(180%);
   
   --glass-subtle-bg: rgba(255, 255, 255, 0.52);
   --glass-subtle-border: rgba(255, 255, 255, 0.6);
-  --glass-subtle-blur: blur(10px) saturate(160%);
+  --glass-subtle-blur: blur(8px) saturate(150%);
 
   --surface-card: var(--glass-card-bg);
   --surface-card-border: var(--glass-card-border);
@@ -75,11 +75,11 @@
   --glass-card-shine: rgba(255, 255, 255, 0.16);
   --glass-card-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.6), 0 8px 20px -4px rgba(0, 0, 0, 0.4);
   --glass-card-inner: inset 0 1px 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4);
-  --glass-card-blur: blur(18px) saturate(190%);
+  --glass-card-blur: blur(14px) saturate(180%);
   
   --glass-subtle-bg: rgba(30, 41, 59, 0.58);
   --glass-subtle-border: rgba(255, 255, 255, 0.08);
-  --glass-subtle-blur: blur(10px) saturate(160%);
+  --glass-subtle-blur: blur(8px) saturate(150%);
 
   --surface-card: var(--glass-card-bg);
   --surface-card-border: var(--glass-card-border);
@@ -190,10 +190,10 @@ body {
   border-radius: 50%;
   pointer-events: none;
   z-index: 2;
-  filter: blur(64px);
-  opacity: 0.65;
+  filter: blur(40px);
+  opacity: 0.6;
   transform: translate3d(0, 0, 0);
-  will-change: transform;
+  contain: layout paint style;
 }
 
 .glass-orb-1 {
@@ -1651,23 +1651,95 @@ body {
   border-radius: 18px;
   padding: 20px 22px;
   text-align: left;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .how-it-works h6 {
   font-weight: 800;
   color: var(--text-heading);
-  font-size: 0.92rem;
-  margin-bottom: 6px;
+  font-size: 0.94rem;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.how-it-works p {
+.how-it-works p,
+.how-it-works-desc {
   color: var(--text-body);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   line-height: 1.6;
   margin-bottom: 0;
+}
+
+/* Dedicated High-Contrast Agronomic Scope Callout */
+.agronomic-scope-box {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-left: 4px solid var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.agronomic-scope-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 5px;
+}
+
+.agronomic-scope-title i {
+  color: #d97706; /* warm amber warning */
+  font-size: 0.92rem;
+}
+
+.agronomic-scope-text {
+  font-size: 0.81rem !important;
+  line-height: 1.58;
+  color: var(--text-body) !important;
+  margin-bottom: 0 !important;
+}
+
+/* Dark Mode Explicit Contrast Boost (Solves Unreadable Agronomic Scope) */
+[data-theme="dark"] .how-it-works {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .how-it-works h6 {
+  color: #f0fdf4 !important;
+}
+
+[data-theme="dark"] .how-it-works p,
+[data-theme="dark"] .how-it-works-desc {
+  color: #cbd5e1 !important; /* crisp slate-300 */
+}
+
+[data-theme="dark"] .agronomic-scope-box {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(52, 211, 153, 0.32);
+  border-left: 4px solid #34d399;
+}
+
+[data-theme="dark"] .agronomic-scope-title {
+  color: #f0fdf4 !important; /* bright emerald-50 */
+}
+
+[data-theme="dark"] .agronomic-scope-title i {
+  color: #fbbf24 !important; /* bright luminous amber */
+}
+
+[data-theme="dark"] .agronomic-scope-text {
+  color: #e2e8f0 !important; /* crisp slate-200, 11:1+ WCAG AAA contrast */
+}
+
+[data-theme="dark"] .text-muted {
+  color: #94a3b8 !important; /* override low-contrast Bootstrap #6c757d */
 }
 
 /* ═══ 5. HISTORY SECTION ═══ */

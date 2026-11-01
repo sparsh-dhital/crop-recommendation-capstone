@@ -4,22 +4,32 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>CropAdvisor — Precision Agro-Intelligence & Crop Recommendation</title>
+
+<!-- Preconnects & DNS Prefetches for sub-millisecond asset handshakes -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.unsplash.com">
+
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"/>
 <link rel="apple-touch-icon" href="/favicon.png"/>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<!-- Optimized font-weight subset for faster FCP/LCP -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/styles.css"/>
 </head>
 <body>
 
 <!-- ═══ BACKGROUND SLIDESHOW ═══ -->
 <div class="bg-slideshow" id="bgSlideshow" aria-hidden="true">
-  <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1280&q=65')"></div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1280&q=65')"></div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1280&q=65')"></div>
+  <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=900&q=60&fm=webp')"></div>
+  <div class="slide" data-bg="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=60&fm=webp"></div>
+  <div class="slide" data-bg="https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=900&q=60&fm=webp"></div>
 </div>
 
 <div class="bg-overlay" aria-hidden="true"></div>
@@ -404,12 +414,18 @@
     <!-- How This Works Transparency Section -->
     <div class="how-it-works">
       <h6><i class="fa-solid fa-circle-info" aria-hidden="true"></i> How this recommendation works</h6>
-      <p>
+      <p class="how-it-works-desc">
         This prediction was computed by a multi-class Random Forest model (100 estimators) trained on 2,200 agricultural observations across 22 distinct crop varieties. Preprocessing uses stratified feature scaling learned strictly on training partitions to prevent data leakage.
       </p>
-      <p class="mt-2 text-muted" style="font-size:0.78rem;">
-        <strong>Important Agronomic Scope:</strong> This classifier identifies matching benchmark conditions. In field farming, actual yields depend on soil depth, drainage, seasonal pests, cultivar selection, and local microclimates. Always verify recommendations with certified agricultural extension specialists.
-      </p>
+      <div class="agronomic-scope-box">
+        <div class="agronomic-scope-title">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span>Important Agronomic Scope</span>
+        </div>
+        <p class="agronomic-scope-text">
+          This classifier identifies matching benchmark conditions. In field farming, actual yields depend on soil depth, drainage, seasonal pests, cultivar selection, and local microclimates. Always verify recommendations with certified agricultural extension specialists.
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -493,6 +509,6 @@
 </aside>
 
 <!-- Frontend Logic -->
-<script src="/app.js"></script>
+<script src="/app.js" defer></script>
 </body>
 </html>
