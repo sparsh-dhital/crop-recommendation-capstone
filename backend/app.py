@@ -28,22 +28,123 @@ IMAGE_MAP = {
 }
 
 
+def _client_address():
+    """Return the client IP for rate limiting.
+
+    When TRUSTED_PROXY=1, use the leftmost X-Forwarded-For address
+    (the original client as seen by the trusted edge proxy).
+    Otherwise, use the direct connection address.
+
+    Security note: X-Forwarded-For is trivially spoofable. Only trust it
+    when the app sits behind a *known* reverse proxy (e.g. Vercel → Render)
+    that overwrites or prepends the header. Set TRUSTED_PROXY=1 explicitly
+    to opt in; never enable it when the app is directly internet-facing.
+    """
+    if os.environ.get('TRUSTED_PROXY') == '1':
+        forwarded = request.headers.get('X-Forwarded-For', '')
+        if forwarded:
+            return forwarded.split(',')[0].strip()
+    return request.remote_addr or 'unknown'
+
+
+# ---------------------------------------------------------------------------
+# Thin database abstraction – keeps one set of SQL with ``?`` placeholders
+# and converts them to ``%s`` for PostgreSQL at execution time.
+# ---------------------------------------------------------------------------
+
+class _DBWrapper:
+    """Minimal wrapper around a DB-API connection.
+
+    * Translates ``?`` placeholders to ``%s`` for PostgreSQL.
+    * Exposes ``execute``, ``commit``, ``rollback``, ``close``,
+      ``executescript`` (SQLite-only shortcut, emulated on PostgreSQL).
+    * ``execute().fetchone()`` returns *dict-like* rows for both backends.
+    """
+
+    def __init__(self, conn, db_type):
+        self._conn = conn
+        self._pg = db_type == 'postgres'
+
+    # -- helpers -----------------------------------------------------------
+
+    @staticmethod
+    def _convert_sql(sql):
+        """Replace ``?`` with ``%s`` (naively – fine for this app's SQL)."""
+        return sql.replace('?', '%s')
+
+    # -- public API --------------------------------------------------------
+
+    def execute(self, sql, params=()):
+        cur = self._conn.cursor()
+        if self._pg:
+            sql = self._convert_sql(sql)
+        cur.execute(sql, params)
+        return cur
+
+    def executescript(self, sql):
+        """Run multi-statement DDL.
+
+        SQLite has ``executescript()``; PostgreSQL can run multiple
+        statements in a single ``execute()`` call.
+        """
+        if self._pg:
+            self._conn.cursor().execute(sql)
+            self._conn.commit()
+        else:
+            self._conn.executescript(sql)
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
+
+
 def create_app(test_config=None):
     app = Flask(__name__, static_folder=str(BASE_DIR.parent / 'frontend' / 'static'))
+
+    # --- Database backend selection ----------------------------------------
+    database_url = os.environ.get('DATABASE_URL')
+    use_postgres = database_url is not None and database_url.startswith('postgres')
+
+    if use_postgres:
+        # Fix Heroku/Render style URLs (postgres:// → postgresql://)
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY'),
-        DATABASE=os.environ.get('DATABASE_PATH', str(BASE_DIR.parent / 'instance' / 'users.sqlite3')),
         SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',
         SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE') == '1',
         PERMANENT_SESSION_LIFETIME=timedelta(hours=8), MAX_CONTENT_LENGTH=16384,
+        DB_TYPE='postgres' if use_postgres else 'sqlite',
     )
+
+    if use_postgres:
+        app.config['DATABASE_URL'] = database_url
+    else:
+        app.config['DATABASE'] = os.environ.get(
+            'DATABASE_PATH',
+            str(BASE_DIR.parent / 'instance' / 'users.sqlite3'),
+        )
+
     if test_config:
         app.config.update(test_config)
-    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
+
+    # Ensure the SQLite parent directory exists (no-op for PostgreSQL).
+    if app.config['DB_TYPE'] == 'sqlite':
+        Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
+
     if not app.config['SECRET_KEY']:
         # Persist the local development key across restarts; never commit it.
-        key_path = Path(app.config['DATABASE']).parent / 'secret.key'
-        key_path.parent.mkdir(exist_ok=True)
+        if app.config['DB_TYPE'] == 'sqlite':
+            key_path = Path(app.config['DATABASE']).parent / 'secret.key'
+        else:
+            key_path = BASE_DIR.parent / 'instance' / 'secret.key'
+        key_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             fd = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         except FileExistsError:
@@ -53,29 +154,63 @@ def create_app(test_config=None):
                 stream.write(secrets.token_hex(32))
         app.config['SECRET_KEY'] = key_path.read_text().strip()
 
+    # --- Connection helper ------------------------------------------------
+
+    def _connect():
+        """Open a raw DB-API connection for the configured backend."""
+        if app.config['DB_TYPE'] == 'postgres':
+            import psycopg2
+            import psycopg2.extras
+            conn = psycopg2.connect(app.config['DATABASE_URL'])
+            conn.cursor_factory = psycopg2.extras.RealDictCursor
+            return conn
+        else:
+            conn = sqlite3.connect(app.config['DATABASE'])
+            conn.row_factory = sqlite3.Row
+            return conn
+
     def db():
         if 'db' not in g:
-            g.db = sqlite3.connect(app.config['DATABASE'])
-            g.db.row_factory = sqlite3.Row
+            g.db = _DBWrapper(_connect(), app.config['DB_TYPE'])
         return g.db
 
     @app.teardown_appcontext
     def close_db(_error):
-        connection = g.pop('db', None)
-        if connection is not None:
-            connection.close()
+        wrapper = g.pop('db', None)
+        if wrapper is not None:
+            wrapper.close()
+
+    # --- Schema -----------------------------------------------------------
+    # Uses REAL for timestamps (works for both SQLite and PostgreSQL).
+    # SQLite auto-increment: INTEGER PRIMARY KEY.
+    # PostgreSQL auto-increment: SERIAL.
+    _sqlite_ddl = '''\
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY, username TEXT NOT NULL COLLATE NOCASE UNIQUE,
+            password_hash TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS sessions (
+            token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS auth_attempts (
+            address TEXT NOT NULL, attempted REAL NOT NULL);
+    '''
+
+    _pg_ddl = '''\
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY, username TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL);
+        CREATE UNIQUE INDEX IF NOT EXISTS users_username_lower_idx ON users (LOWER(username));
+        CREATE TABLE IF NOT EXISTS sessions (
+            token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires DOUBLE PRECISION NOT NULL);
+        CREATE TABLE IF NOT EXISTS auth_attempts (
+            address TEXT NOT NULL, attempted DOUBLE PRECISION NOT NULL);
+    '''
 
     with app.app_context():
-        db().executescript('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY, username TEXT NOT NULL COLLATE NOCASE UNIQUE,
-                password_hash TEXT NOT NULL);
-            CREATE TABLE IF NOT EXISTS sessions (
-                token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires REAL NOT NULL);
-            CREATE TABLE IF NOT EXISTS auth_attempts (
-                address TEXT NOT NULL, attempted REAL NOT NULL);
-        ''')
+        ddl = _pg_ddl if app.config['DB_TYPE'] == 'postgres' else _sqlite_ddl
+        db().executescript(ddl)
         db().commit()
+
+    # --- Helpers ----------------------------------------------------------
 
     def csrf_token():
         if 'csrf_token' not in session:
@@ -86,10 +221,26 @@ def create_app(test_config=None):
         return hashlib.sha256(session.get('auth_token', '').encode()).hexdigest()
 
     def current_user():
-        return db().execute(
+        if not session.get('auth_token'):
+            return None
+        row = db().execute(
             'SELECT users.id, users.username FROM sessions JOIN users ON users.id = sessions.user_id '
             'WHERE token_hash = ? AND expires > ?', (token_hash(), time.time())
         ).fetchone()
+        return row
+
+    # --- Integrity-error handling -----------------------------------------
+    # PostgreSQL raises psycopg2.IntegrityError; SQLite raises
+    # sqlite3.IntegrityError.  We catch both via a helper tuple.
+
+    _integrity_errors = (sqlite3.IntegrityError,)
+    try:
+        import psycopg2
+        _integrity_errors = (sqlite3.IntegrityError, psycopg2.IntegrityError)
+    except ImportError:
+        pass
+
+    # --- Routes -----------------------------------------------------------
 
     @app.before_request
     def protect_mutations():
@@ -112,6 +263,22 @@ def create_app(test_config=None):
     def index():
         return send_from_directory(BASE_DIR.parent / 'frontend', 'index.html')
 
+    @app.get('/styles.css')
+    def styles():
+        return send_from_directory(BASE_DIR.parent / 'frontend', 'styles.css')
+
+    @app.get('/app.js')
+    def app_js():
+        return send_from_directory(BASE_DIR.parent / 'frontend', 'app.js')
+
+    @app.get('/favicon.ico')
+    def favicon_ico():
+        return send_from_directory(BASE_DIR.parent / 'frontend' / 'static', 'favicon.ico', mimetype='image/x-icon')
+
+    @app.get('/favicon.svg')
+    def favicon_svg():
+        return send_from_directory(BASE_DIR.parent / 'frontend' / 'static', 'favicon.svg', mimetype='image/svg+xml')
+
     @app.get('/health')
     def health():
         return jsonify(status='ok')
@@ -125,7 +292,7 @@ def create_app(test_config=None):
     @app.post('/api/login')
     def authenticate():
         # Bound authentication attempts for this local demo (10 attempts / IP / 15 minutes).
-        address = request.remote_addr or 'unknown'
+        address = _client_address()
         now = time.time()
         db().execute('DELETE FROM auth_attempts WHERE attempted < ?', (now - 900,))
         attempts = db().execute('SELECT COUNT(*) FROM auth_attempts WHERE address = ?', (address,)).fetchone()[0]
@@ -149,10 +316,10 @@ def create_app(test_config=None):
                 db().execute('INSERT INTO users (username, password_hash) VALUES (?, ?)',
                              (username, generate_password_hash(password)))
                 db().commit()
-            except sqlite3.IntegrityError:
+            except _integrity_errors:
                 db().rollback()
                 return jsonify(success=False, error='That username is already registered. Please sign in.'), 409
-        user = db().execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        user = db().execute('SELECT * FROM users WHERE LOWER(username) = LOWER(?)', (username,)).fetchone()
         if not user or not check_password_hash(user['password_hash'], password):
             return jsonify(success=False, error='Incorrect username or password.'), 401
         db().execute('DELETE FROM sessions WHERE token_hash = ? OR expires <= ?', (token_hash(), now))
@@ -167,8 +334,9 @@ def create_app(test_config=None):
 
     @app.post('/api/logout')
     def logout():
-        db().execute('DELETE FROM sessions WHERE token_hash = ?', (token_hash(),))
-        db().commit()
+        if session.get('auth_token'):
+            db().execute('DELETE FROM sessions WHERE token_hash = ?', (token_hash(),))
+            db().commit()
         session.clear()
         return jsonify(success=True, csrf_token=csrf_token())
 

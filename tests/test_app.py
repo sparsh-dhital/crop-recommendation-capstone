@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import time
 import pytest
@@ -98,3 +99,114 @@ def test_rate_limit(client):
     for _ in range(10):
         assert post(client, '/api/login',dict(username='unknown',password=PASSWORD)).status_code == 401
     assert post(client, '/api/login',dict(username='unknown',password=PASSWORD)).status_code == 429
+
+# --- Proxy-aware rate-limit tests ----------------------------------------
+
+def test_rate_limit_ignores_xff_without_trusted_proxy(tmp_path):
+    """Without TRUSTED_PROXY, X-Forwarded-For must be ignored and
+    rate-limiting must key on request.remote_addr."""
+    # Ensure TRUSTED_PROXY is NOT set for this test.
+    env_backup = os.environ.pop('TRUSTED_PROXY', None)
+    try:
+        app = create_app({
+            'TESTING': True, 'SECRET_KEY': 'test-only-key',
+            'DATABASE': str(tmp_path / 'xff_ignore.sqlite3'),
+        })
+        client = app.test_client()
+        # Send 10 attempts claiming a different IP via X-Forwarded-For.
+        for _ in range(10):
+            tok = client.get('/api/session').json['csrf_token']
+            resp = client.post(
+                '/api/login', json=dict(username='unknown', password=PASSWORD),
+                headers={'X-CSRF-Token': tok, 'X-Forwarded-For': '1.2.3.4'},
+            )
+            assert resp.status_code == 401
+        # The 11th attempt should still be rate-limited because the app
+        # must be using remote_addr (127.0.0.1), not the spoofed XFF.
+        tok = client.get('/api/session').json['csrf_token']
+        resp = client.post(
+            '/api/login', json=dict(username='unknown', password=PASSWORD),
+            headers={'X-CSRF-Token': tok, 'X-Forwarded-For': '1.2.3.4'},
+        )
+        assert resp.status_code == 429
+    finally:
+        if env_backup is not None:
+            os.environ['TRUSTED_PROXY'] = env_backup
+
+
+def test_rate_limit_uses_xff_with_trusted_proxy(tmp_path):
+    """With TRUSTED_PROXY=1, rate limiting must key on the leftmost
+    X-Forwarded-For address instead of remote_addr."""
+    os.environ['TRUSTED_PROXY'] = '1'
+    try:
+        app = create_app({
+            'TESTING': True, 'SECRET_KEY': 'test-only-key',
+            'DATABASE': str(tmp_path / 'xff_trusted.sqlite3'),
+        })
+        client = app.test_client()
+
+        # Exhaust rate limit for a spoofed IP.
+        for _ in range(10):
+            tok = client.get('/api/session').json['csrf_token']
+            resp = client.post(
+                '/api/login', json=dict(username='unknown', password=PASSWORD),
+                headers={'X-CSRF-Token': tok, 'X-Forwarded-For': '10.0.0.1'},
+            )
+            assert resp.status_code == 401
+
+        # 11th attempt from the *same* forwarded IP should be blocked.
+        tok = client.get('/api/session').json['csrf_token']
+        resp = client.post(
+            '/api/login', json=dict(username='unknown', password=PASSWORD),
+            headers={'X-CSRF-Token': tok, 'X-Forwarded-For': '10.0.0.1'},
+        )
+        assert resp.status_code == 429
+
+        # A *different* forwarded IP should still be allowed.
+        tok = client.get('/api/session').json['csrf_token']
+        resp = client.post(
+            '/api/login', json=dict(username='unknown', password=PASSWORD),
+            headers={'X-CSRF-Token': tok, 'X-Forwarded-For': '10.0.0.2'},
+        )
+        assert resp.status_code == 401  # wrong creds, but not rate-limited
+    finally:
+        del os.environ['TRUSTED_PROXY']
+
+
+def test_static_asset_routes(client):
+    """Verify frontend static assets are routed correctly by Flask."""
+    css = client.get('/styles.css')
+    assert css.status_code == 200
+    assert 'text/css' in css.headers['Content-Type']
+    assert b'.bg-slideshow' in css.data
+
+    js = client.get('/app.js')
+    assert js.status_code == 200
+    assert 'javascript' in js.headers['Content-Type']
+    assert b'initializeSession' in js.data
+
+    fav_ico = client.get('/favicon.ico')
+    assert fav_ico.status_code == 200
+
+    fav_svg = client.get('/favicon.svg')
+    assert fav_svg.status_code == 200
+    assert 'image/svg+xml' in fav_svg.headers['Content-Type']
+
+
+def test_health_and_security_headers(client):
+    """Verify health endpoint and security headers on responses."""
+    health = client.get('/health')
+    assert health.status_code == 200
+    assert health.json == {'status': 'ok'}
+    assert health.headers['X-Content-Type-Options'] == 'nosniff'
+    assert health.headers['X-Frame-Options'] == 'DENY'
+    assert 'no-store' in health.headers['Cache-Control']
+
+
+def test_unauthenticated_prediction_fails_cleanly(client):
+    """Verify predict returns 401 with informative error for unauthenticated requests."""
+    res = post(client, '/predict', INPUT)
+    assert res.status_code == 401
+    assert res.json['success'] is False
+    assert 'sign in' in res.json['error'].lower()
+

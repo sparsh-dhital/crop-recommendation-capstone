@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-# Deployment update
+# Crop Recommendation System Using Machine Learning
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the current folder layout and Render + Vercel instructions.
-
-# Crop Recommendation System Using Machine Learning
 
 An educational Flask application that classifies soil and climate measurements into one of 22 crop labels. It does **not** predict crop yield, profit, or guaranteed agricultural suitability.
 
@@ -30,15 +27,15 @@ python app.py
 
 Open http://127.0.0.1:5000, choose **Get Started**, then **Create an account**. Use a username of 3–32 letters, numbers or underscores and a password of 8–128 characters. Sign-up and sign-in are separate actions. There are no default credentials. `/login` opens the same working login form directly.
 
-Accounts previously stored in the browser must be registered again. The app removes its old plaintext password registry; it never imports those passwords. Accounts now persist in `instance/users.sqlite3` on the machine running Flask. Keep this directory if you want accounts to survive moving/restarting the application. Never commit it.
+Accounts previously stored in the browser must be registered again. The app removes its old plaintext password registry; it never imports those passwords. Accounts persist in `instance/users.sqlite3` on the machine running Flask (or PostgreSQL when `DATABASE_URL` is set). Keep this directory if you want accounts to survive moving/restarting the application. Never commit it.
 
 ## Authentication
 
 - Passwords are hashed with Werkzeug's scrypt implementation.
-- An HttpOnly, SameSite=Lax signed cookie carries a random session token. SQLite stores only its hash and an eight-hour expiry.
+- An HttpOnly, SameSite=Lax signed cookie carries a random session token. Database stores only its hash and an eight-hour expiry.
 - Logout revokes that token server-side, including a copied old cookie.
 - POST requests require a CSRF token. Unknown usernames never silently create accounts.
-- Login and registration are limited to ten attempts per client IP in fifteen minutes, cleared after successful authentication. This simple local-demo limit can affect users sharing an IP.
+- Login and registration are rate-limited to ten attempts per client IP in fifteen minutes, cleared after successful authentication. When behind a trusted edge proxy (Vercel), `TRUSTED_PROXY=1` ensures real client IPs are evaluated.
 - Prediction history stays in the current browser, separated by username. It is not encrypted or synchronized and should not be treated as private storage on shared devices.
 - Password recovery, email verification, production monitoring and multi-server deployment are outside this classroom prototype.
 
@@ -81,26 +78,27 @@ The notebook now calls the same training script, avoiding a second conflicting t
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
+npm install
+python tests/run_ui.py
 ```
 
-Tests cover account persistence, password hashing, wrong passwords, duplicate accounts, CSRF checks, session expiry, logout revocation, rate limits, missing/invalid inputs, and an actual saved-model rice prediction.
+Tests cover account persistence, password hashing, wrong passwords, duplicate accounts, CSRF checks, session expiry, logout revocation, rate limits, proxy-aware IP handling, missing/invalid inputs, static asset routing, and an actual saved-model rice prediction.
 
 ## Project structure
 
-- `backend/app.py`: Flask routes, authentication, input checks, inference.
-- `frontend/index.html`: existing green UI with working login/registration.
+- `backend/app.py`: Flask routes, authentication, PostgreSQL/SQLite database support, input checks, inference.
+- `frontend/index.html`: semantic HTML shell with accessibility and live regions.
+- `frontend/styles.css`: styling, responsive breakpoints, reduced-motion preferences, and focus indicators.
+- `frontend/app.js`: resilient session initialization with retry logic, DOM-safe rendering, and local history management.
+- `frontend/static/`: crop images allowlisted for display.
 - `backend/train.py`: reproducible training and evaluation.
 - `evaluation/`: measured results for the report/poster.
-- `tests/test_app.py`: regression tests.
+- `tests/test_app.py`: pytest backend unit and security tests.
+- `tests/test_ui.cjs`: JSDOM-based DOM integration tests against Flask.
 - `docs/CAPSTONE_REVIEW.md`: checklist against faculty guidelines and report corrections.
 
-The original unused `minmaxscaler.pkl`, `standscaler.pkl`, `get-pip.py` and empty `landing.html` remain for compatibility/history; the application does not use them. Images for jute and mothbeans were not supplied, so those predictions show an explicit image-unavailable message. The mungbean mapping now points to the existing image.
+The original unused `minmaxscaler.pkl`, `standscaler.pkl`, `get-pip.py` and empty `landing.html` remain for compatibility/history; the application does not use them. Images for jute and mothbeans were not supplied, so those predictions show an explicit image-unavailable message. The mungbean mapping points to the existing image.
 
 ## Acknowledgements
 
 Built on this team's existing Crop-Recommendation-System repository. Uses Flask/Werkzeug, NumPy, pandas, scikit-learn and Matplotlib. The interface uses Bootstrap, Font Awesome, Google Fonts and external background images, which need internet access. Confirm licenses/attribution for the supplied CSV and images before redistribution. AI-assisted code changes must be reviewed and understood by all team members, as required by the faculty guidelines.
-
-For the optional DOM integration test, install Node.js 20+ and run `npm install`, then `python tests/run_ui.py` with the Python environment activated. This starts a server on port 5051 with a temporary database and exercises the rendered page's JavaScript against Flask. It checks registration/mismatch, prediction/history, logout and both wrong/correct login. This is DOM integration testing, not a substitute for visual testing in a real browser.
-=======
-# crop-recommendation-capstone
->>>>>>> 627478054399083bf0e365644856d41715c79a1d

@@ -1,864 +1,496 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>🌾 Crop Recommendation System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>CropAdvisor — Precision Agro-Intelligence & Crop Recommendation</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="alternate icon" type="image/x-icon" href="/favicon.ico"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Poppins',sans-serif;overflow-x:hidden;min-height:100vh;}
-
-/* ═══ BACKGROUND SLIDESHOW ═══ */
-.bg-slideshow{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
-.bg-slideshow .slide{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background-size:cover;background-position:center;
-  opacity:0;transition:opacity 2.5s ease-in-out;
-}
-.bg-slideshow .slide.active{opacity:1;}
-
-.bg-overlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;
-  background:linear-gradient(135deg,
-    rgba(255,255,255,0.6) 0%,
-    rgba(220,252,231,0.5) 40%,
-    rgba(187,247,208,0.45) 70%,
-    rgba(255,255,255,0.55) 100%
-  );
-  backdrop-filter:blur(1px);
-}
-
-.slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px;}
-.slide-dots .dot{width:10px;height:10px;border-radius:50%;background:rgba(0,0,0,.15);transition:.4s;border:2px solid rgba(255,255,255,.5);}
-.slide-dots .dot.active{background:#16a34a;width:28px;border-radius:5px;border-color:#16a34a;}
-
-/* ═══ VIEWS ═══ */
-.view{display:none;position:relative;z-index:10;min-height:100vh;animation:fadeUp .55s ease;}
-.view.active{display:flex;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(35px);}to{opacity:1;transform:translateY(0);}}
-
-/* ═══ LANDING ═══ */
-#landing{justify-content:center;align-items:center;text-align:center; min-height: 100vh;}
-.landing-box h1{font-weight:900;font-size:3.2rem;line-height:1.12;color:#14532d;}
-
-.landing-box p{color:#4b5563;font-size:1.08rem;margin:18px 0 28px;line-height:1.7;}
-.landing-box .tagline{
-  font-size:18px;color:#077f33;font-weight:800;
-  margin-bottom:30px;letter-spacing:.10px;
-  margin-top:30px;
-}
-
-.crop-carousel{display:flex;justify-content:center;gap:15px;margin-bottom:22px;}
-.crop-carousel span{
-  font-size:3rem;animation:bounce 2s ease-in-out infinite;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,.12));
-}
-.crop-carousel span:nth-child(2){animation-delay:.1s;}
-.crop-carousel span:nth-child(3){animation-delay:.2s;}
-.crop-carousel span:nth-child(4){animation-delay:.3s;}
-.crop-carousel span:nth-child(5){animation-delay:.4s;}
-.crop-carousel span:nth-child(6){animation-delay:.5s;}
-.crop-carousel span:nth-child(7){animation-delay:.6s;}
-@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
-
-.feature-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:30px;}
-.feature-pills .pill{
-  background:linear-gradient(135deg,#dcfce7,#bbf7d0);
-  border:1px solid #86efac;padding:9px 20px;border-radius:50px;
-  font-size:.82rem;color:#15803d;font-weight:600;
-  display:flex;align-items:center;gap:6px;
-  box-shadow:0 3px 10px rgba(34,197,94,.12);
-}
-.feature-pills .pill i{color:#16a34a;}
-
-.btn-glow{
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:none;color:#fff;padding:16px 58px;
-  border-radius:50px;font-size:1.15rem;font-weight:700;
-  cursor:pointer;transition:.35s;
-  box-shadow:0 8px 30px rgba(34,197,94,.35);
-  text-decoration:none;display:inline-flex;align-items:center;gap:10px;
-}
-.btn-glow:hover{
-  transform:translateY(-4px) scale(1.02);
-  box-shadow:0 14px 50px rgba(34,197,94,.5);color:#fff;
-}
-
-/* ═══ LOGIN ═══ */
-#login{justify-content:center;align-items:center; min-height: 100vh;}
-.login-card{
-  background:rgba(255,255,255,0.9);
-  backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,.95);
-  border-radius:30px;padding:55px 44px;
-  width:450px;text-align:center;
-  box-shadow:0 24px 70px rgba(0,0,0,.07);
-}
-.login-card .icon-circle{
-  width:78px;height:78px;border-radius:50%;
-  background:linear-gradient(135deg,#22c55e,#4ade80);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 22px;font-size:2rem;color:#fff;
-  box-shadow:0 12px 35px rgba(34,197,94,.3);
-}
-.login-card h2{font-weight:800;color:#14532d;margin-bottom:6px;font-size:1.8rem;}
-.login-card p.sub{color:#6b7280;margin-bottom:30px;font-size:.93rem;}
-.login-card .input-group-text{
-  background:linear-gradient(135deg,#dcfce7,#bbf7d0);
-  border:2px solid #86efac;color:#16a34a;
-  border-radius:14px 0 0 14px;font-size:1rem;
-}
-.login-card input{
-  background:#f0fdf4;border:2px solid #86efac;
-  color:#14532d;border-radius:0 14px 14px 0;
-  padding:14px 16px;font-weight:500;
-}
-.login-card input::placeholder{color:#9ca3af;}
-.login-card input:focus{
-  box-shadow:0 0 0 4px rgba(34,197,94,.2);
-  border-color:#22c55e;background:#fff;color:#14532d;
-}
-.login-card .input-group{margin-bottom:18px;}
-.login-card .btn-login{
-  width:100%;padding:14px;border-radius:16px;font-weight:700;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:none;font-size:1.05rem;margin-top:10px;
-  transition:.35s;color:#fff;
-  box-shadow:0 6px 22px rgba(34,197,94,.3);
-}
-.login-card .btn-login:hover{
-  transform:translateY(-3px);
-  box-shadow:0 12px 38px rgba(34,197,94,.4);
-}
-.login-card .back-link{
-  display:inline-block;margin-top:22px;color:#6b7280;
-  text-decoration:none;font-size:.88rem;transition:.3s;font-weight:500;
-}
-.login-card .back-link:hover{color:#16a34a;}
-.login-error{
-  background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;
-  color:#dc2626;font-size:.85rem;padding:10px;margin-bottom:14px;display:none;
-}
-
-/* ═══ NAVBAR ═══ */
-.top-nav{
-  position:fixed;top:0;left:0;width:100%;
-  background:rgba(255,255,255,0.88);backdrop-filter:blur(18px);
-  border-bottom:2px solid rgba(34,197,94,.12);
-  z-index:100;padding:13px 32px;
-  display:flex;justify-content:space-between;align-items:center;
-  box-shadow:0 4px 22px rgba(0,0,0,.04);
-}
-.top-nav .brand{font-weight:800;font-size:1.2rem;color:#16a34a;display:flex;align-items:center;gap:8px;}
-.top-nav .brand i{font-size:1.4rem;}
-.top-nav .user-badge{display:flex;align-items:center;gap:14px;}
-.top-nav .user-badge span{
-  background:linear-gradient(135deg,#dcfce7,#bbf7d0);
-  color:#15803d;font-weight:600;
-  padding:7px 18px;border-radius:20px;font-size:.85rem;
-  border:1px solid #86efac;
-}
-.btn-logout{
-  background:#fef2f2;color:#dc2626;
-  border:2px solid #fca5a5;
-  padding:7px 20px;border-radius:12px;
-  font-size:.85rem;cursor:pointer;transition:.3s;font-weight:600;
-}
-.btn-logout:hover{background:#dc2626;color:#fff;border-color:#dc2626;}
-
-/* ═══ PREDICT VIEW ═══ */
-#predict{flex-direction:column;align-items:center;padding:100px 20px 60px; min-height: 100vh;}
-.predict-card{
-  background:rgba(255,255,255,0.88);
-  backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.92);
-  border-radius:30px;padding:48px 44px;
-  max-width:960px;width:100%;
-  box-shadow:0 22px 65px rgba(0,0,0,.06);
-}
-.predict-card h2{text-align:center;font-weight:800;color:#14532d;margin-bottom:6px;font-size:1.7rem;}
-.predict-card h2 i{color:#22c55e;margin-right:10px;}
-.predict-card .sub-text{text-align:center;color:#6b7280;margin-bottom:38px;font-size:.93rem;}
-
-.field-card{
-  background:linear-gradient(135deg,#f0fdf4,#fafff7);
-  border:2px solid #bbf7d0;
-  border-radius:18px;padding:18px 20px;
-  transition:.35s;position:relative;overflow:hidden;
-}
-.field-card::before{
-  content:'';position:absolute;top:0;left:0;
-  width:0;height:3px;
-  background:linear-gradient(90deg,#22c55e,#4ade80,#86efac);
-  transition:.45s;border-radius:3px;
-}
-.field-card:hover::before,.field-card:focus-within::before{width:100%;}
-.field-card:hover,.field-card:focus-within{
-  border-color:#22c55e;
-  background:linear-gradient(135deg,#dcfce7,#f0fdf4);
-  transform:translateY(-3px);
-  box-shadow:0 8px 28px rgba(34,197,94,.12);
-}
-.field-card label{
-  font-size:.78rem;font-weight:600;color:#15803d;
-  text-transform:uppercase;letter-spacing:.7px;
-  margin-bottom:6px;display:flex;align-items:center;gap:6px;
-}
-.field-card label i{color:#22c55e;font-size:.9rem;}
-.field-card input{
-  width:100%;background:transparent;border:none;
-  color:#14532d;font-size:1.25rem;font-weight:700;
-  outline:none;padding:4px 0;
-}
-.field-card input::placeholder{color:#a3a3a3;font-weight:400;font-size:1rem;}
-.field-card input::-webkit-outer-spin-button,
-.field-card input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.field-card input[type=number]{-moz-appearance:textfield;}
-
-.btn-predict{
-  display:flex;align-items:center;justify-content:center;
-  gap:10px;margin:40px auto 0;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:none;color:#fff;padding:17px 65px;
-  border-radius:18px;font-size:1.1rem;font-weight:700;
-  cursor:pointer;transition:.35s;
-  box-shadow:0 10px 38px rgba(34,197,94,.3);
-}
-.btn-predict:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(34,197,94,.45);}
-.btn-predict:disabled{opacity:.6;cursor:wait;}
-
-.spinner{display:none;}
-.spinner.show{display:inline-block;}
-.spinner i{animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* ═══ RESULT VIEW - WIDER, SHORTER HEIGHT, LARGER FONTS ═══ */
-#result{
-  justify-content:center;align-items:center; min-height: 100vh;
-  text-align:center;flex-direction:column;padding:80px 20px 40px;
-}
-.result-container{
-  background:rgba(255,255,255,0.88);
-  backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,.85);
-  border-radius:28px;
-  padding:32px 50px;
-  max-width:900px;
-  width:100%;
-  box-shadow:0 18px 50px rgba(0,0,0,.05);
-  position:relative;
-  overflow:hidden;
-}
-.result-container::before{
-  content:'';position:absolute;top:-60px;right:-60px;
-  width:180px;height:180px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(74,222,128,.06));z-index:0;
-}
-.result-container::after{
-  content:'';position:absolute;bottom:-50px;left:-50px;
-  width:150px;height:150px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(253,224,71,.04));z-index:0;
-}
-.result-container>*{position:relative;z-index:1;}
-
-.result-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,rgba(220,252,231,0.9),rgba(187,247,208,0.8));
-  border:1px solid rgba(134,239,172,0.7);
-  padding:8px 22px;border-radius:50px;
-  font-size:.85rem;font-weight:600;color:#15803d;
-  margin-bottom:14px;
-  box-shadow:0 4px 15px rgba(34,197,94,.1);
-}
-.result-badge i{font-size:1rem;}
-
-.result-crop-name{
-  font-size:3.2rem;font-weight:900;
-  background:linear-gradient(135deg,#16a34a,#22c55e,#4ade80);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-  margin-bottom:4px;line-height:1.15;
-}
-.result-tagline{color:#6b7280;font-size:.95rem;margin-bottom:18px;font-weight:400;}
-
-.result-img-wrap{
-  position:relative;display:inline-block;
-  border-radius:18px;overflow:hidden;
-  box-shadow:0 12px 35px rgba(0,0,0,.08);
-  border:2px solid rgba(187,247,208,0.7);margin-bottom:22px;
-}
-.result-img-wrap img{max-height:220px;display:block;border-radius:16px;}
-.no-img-msg{color:#9ca3af;font-style:italic;font-size:.9rem;margin-bottom:22px;}
-
-.result-details{
-  display:flex;justify-content:center;gap:10px;
-  flex-wrap:wrap;margin-bottom:24px;
-}
-.result-details .detail-chip{
-  background:rgba(240,253,244,0.85);
-  border:1px solid rgba(187,247,208,0.6);
-  padding:10px 18px;border-radius:12px;
-  font-size:.95rem;color:#15803d;font-weight:700;
-  display:flex;align-items:center;gap:6px;
-  transition:.3s;
-}
-.result-details .detail-chip:hover{
-  background:rgba(220,252,231,0.9);transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(34,197,94,.1);
-}
-.result-details .detail-chip i{color:#22c55e;font-size:.85rem;}
-
-.result-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
-.btn-back{
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:none;color:#fff;padding:12px 32px;
-  border-radius:14px;font-size:.95rem;font-weight:700;
-  cursor:pointer;transition:.35s;
-  box-shadow:0 8px 25px rgba(34,197,94,.25);
-  display:flex;align-items:center;gap:8px;
-}
-.btn-back:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(34,197,94,.35);}
-.btn-home{
-  background:rgba(255,255,255,0.9);
-  border:2px solid rgba(187,247,208,0.7);color:#15803d;
-  padding:12px 32px;border-radius:14px;font-size:.95rem;
-  font-weight:700;cursor:pointer;transition:.35s;
-  display:flex;align-items:center;gap:8px;
-}
-.btn-home:hover{background:rgba(240,253,244,0.95);transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.05);}
-
-/* ═══ HISTORY ═══ */
-.history-section{margin-top:48px;max-width:960px;width:100%;}
-.history-section h5{
-  color:#374151;font-weight:700;margin-bottom:16px;
-  display:flex;align-items:center;gap:8px;font-size:1rem;
-}
-.history-section h5 i{color:#22c55e;}
-.history-list{display:flex;flex-direction:column;gap:10px;}
-.history-item{
-  display:flex;justify-content:space-between;align-items:center;
-  background:rgba(255,255,255,0.78);backdrop-filter:blur(10px);
-  border:1px solid rgba(34,197,94,.12);
-  border-radius:16px;padding:16px 22px;transition:.3s;cursor:pointer;
-}
-.history-item:hover{
-  border-color:#22c55e;background:rgba(220,252,231,.6);
-  transform:translateX(5px);box-shadow:0 5px 18px rgba(34,197,94,.08);
-}
-.history-item .crop{font-weight:700;color:#15803d;font-size:1rem;}
-.history-item .details{color:#6b7280;font-size:.78rem;margin-top:2px;}
-.history-item .time{color:#9ca3af;font-size:.78rem;white-space:nowrap;}
-.btn-clear-history{
-  margin-top:14px;background:#fef2f2;color:#dc2626;
-  border:2px solid #fca5a5;padding:9px 24px;border-radius:12px;
-  font-size:.82rem;cursor:pointer;transition:.3s;font-weight:600;
-}
-.btn-clear-history:hover{background:#dc2626;color:#fff;border-color:#dc2626;}
-
-/* ═══ TOAST ═══ */
-.toast-container{position:fixed;top:20px;right:20px;z-index:9999;}
-.custom-toast{
-  background:rgba(255,255,255,0.96);backdrop-filter:blur(14px);
-  border:1px solid rgba(0,0,0,.05);color:#1f2937;
-  padding:15px 26px;border-radius:16px;margin-bottom:10px;
-  display:flex;align-items:center;gap:10px;
-  font-size:.9rem;min-width:300px;font-weight:500;
-  animation:slideIn .4s ease;
-  box-shadow:0 12px 45px rgba(0,0,0,.08);
-}
-.custom-toast.success{border-left:5px solid #22c55e;}
-.custom-toast.success i{color:#22c55e;}
-.custom-toast.error{border-left:5px solid #ef4444;}
-.custom-toast.error i{color:#ef4444;}
-.custom-toast.info{border-left:5px solid #3b82f6;}
-.custom-toast.info i{color:#3b82f6;}
-@keyframes slideIn{from{opacity:0;transform:translateX(60px);}to{opacity:1;transform:translateX(0);}}
-
-@media(max-width:768px){
-  .result-container{padding:28px 25px;max-width:95%;}
-  .result-crop-name{font-size:2.4rem;}
-  .result-details .detail-chip{padding:8px 14px;font-size:.85rem;}
-  .result-details{gap:8px;}
-}
-
-@media(max-width:576px){
-  .landing-box h1{font-size:2.1rem;}
-  .landing-box{padding:35px 22px;}
-  .login-card{width:92%;padding:38px 24px;}
-  .predict-card{padding:30px 18px;}
-  .result-container{padding:24px 18px;}
-  .result-crop-name{font-size:2rem;}
-  .result-img-wrap img{max-height:160px;}
-  .result-details .detail-chip{padding:7px 12px;font-size:.8rem;}
-  .btn-back,.btn-home{padding:10px 24px;font-size:.88rem;}
-  .crop-carousel span{font-size:2.2rem;}
-  .feature-pills .pill{font-size:.72rem;padding:6px 12px;}
-  .top-nav{padding:10px 16px;}
-}
-</style>
+<link rel="stylesheet" href="/styles.css"/>
 </head>
 <body>
 
-<!-- ═══ BACKGROUND ═══ -->
-<div class="bg-slideshow" id="bgSlideshow">
-  <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1920&q=80')"></div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80')"></div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1920&q=80')"></div>
+<!-- ═══ BACKGROUND SLIDESHOW ═══ -->
+<div class="bg-slideshow" id="bgSlideshow" aria-hidden="true">
+  <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1280&q=65')"></div>
+  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1280&q=65')"></div>
+  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1280&q=65')"></div>
 </div>
 
-<div class="bg-overlay"></div>
-<div class="slide-dots" id="slideDots"></div>
-<div class="toast-container" id="toastContainer"></div>
+<div class="bg-overlay" aria-hidden="true"></div>
+<!-- Ambient Glass Color Orbs -->
+<div class="glass-ambient-orb glass-orb-1" aria-hidden="true"></div>
+<div class="glass-ambient-orb glass-orb-2" aria-hidden="true"></div>
+<div class="glass-ambient-orb glass-orb-3" aria-hidden="true"></div>
+<div class="slide-dots" id="slideDots" role="group" aria-label="Background image selection"></div>
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-
-<!-- ═══ 1. LANDING ═══ -->
-<div class="view active" id="landing">
-  <div class="landing-box">
-    <div class="crop-carousel">
+<!-- ═══ 1. LANDING VIEW ═══ -->
+<main class="view active" id="landing" role="region" aria-label="Landing page">
+  <div class="landing-card">
+    <div class="hero-badge">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      Precision Agro-ML • 22 Supported Crops
+    </div>
+    
+    <div class="crop-carousel" aria-hidden="true">
       <span>🌾</span><span>🌽</span><span>🍅</span><span>🥭</span><span>🍇</span><span>🍊</span>
     </div>
-    <h1>Smart <span>Crop</span><br/>Recommendation</h1>
-    <p class="tagline">🌿 AI-POWERED AGRICULTURE ASSISTANT</p>
-    <p style="color: #0e4d0f;">Leverage machine learning to discover the ideal crop for your soil conditions and local climate — accurate, instant, data-driven.</p>
-    <div class="feature-pills">
-      <div class="pill"><i class="fa-solid fa-brain"></i> AI Powered</div>
-      <div class="pill"><i class="fa-solid fa-bolt"></i> Instant Results</div>
-      <div class="pill"><i class="fa-solid fa-seedling"></i> 22 Crops</div>
-      <div class="pill"><i class="fa-solid fa-clock-rotate-left"></i> History Saved</div>
+    
+    <h1>Smart <span class="gradient-text">Crop Recommendation</span></h1>
+    <p class="tagline"><span aria-hidden="true">🌿</span> DATA-DRIVEN AGRICULTURAL INTELLIGENCE</p>
+    <p class="hero-desc">
+      Leverage machine learning to identify optimal crop varieties tailored to your exact soil chemistry and local climate conditions. Fast, scientific, and privacy-focused.
+    </p>
+
+    <!-- Bento Key Metrics Bar -->
+    <div class="bento-stats" role="region" aria-label="Model metrics summary">
+      <div class="bento-stat-item">
+        <div class="bento-stat-num">2,200</div>
+        <div class="bento-stat-label">Soil Profiles</div>
+      </div>
+      <div class="bento-stat-item">
+        <div class="bento-stat-num">22</div>
+        <div class="bento-stat-label">Crop Species</div>
+      </div>
+      <div class="bento-stat-item">
+        <div class="bento-stat-num">99.55%</div>
+        <div class="bento-stat-label">Test Accuracy</div>
+      </div>
+      <div class="bento-stat-item">
+        <div class="bento-stat-num">&lt; 50ms</div>
+        <div class="bento-stat-label">Inference Time</div>
+      </div>
     </div>
-    <button class="btn-glow" onclick="showView('login')">
-      Get Started <i class="fa-solid fa-arrow-right"></i>
-    </button>
+
+    <!-- Feature Highlights -->
+    <div class="feature-pills">
+      <div class="pill"><i class="fa-solid fa-flask" aria-hidden="true"></i> N-P-K & pH Profiling</div>
+      <div class="pill"><i class="fa-solid fa-cloud-sun-rain" aria-hidden="true"></i> Microclimate Modeling</div>
+      <div class="pill"><i class="fa-solid fa-brain" aria-hidden="true"></i> Random Forest Ensemble</div>
+      <div class="pill"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Durable & Private</div>
+    </div>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <button class="btn-glow" type="button" onclick="showView('login')">
+        Get Started <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </button>
+      <button class="btn-home" type="button" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> Theme
+      </button>
+    </div>
   </div>
-</div>
+</main>
 
-
-<!-- ═══ 2. LOGIN ═══ -->
-<div class="view" id="login">
+<!-- ═══ 2. AUTHENTICATION VIEW ═══ -->
+<section class="view" id="login" role="region" aria-label="Authentication">
   <div class="login-card">
-    <div class="icon-circle"><i class="fa-solid fa-seedling"></i></div>
+    <div class="icon-circle" aria-hidden="true"><i class="fa-solid fa-seedling"></i></div>
     <h2 id="authTitle">Welcome Back</h2>
     <p class="sub" id="authSubtitle">Sign in to access crop predictions</p>
+
+    <!-- Segmented Tab Toggle -->
+    <div class="auth-segmented" role="tablist" aria-label="Authentication mode">
+      <button type="button" class="auth-seg-btn active" id="tabSignIn" onclick="setAuthMode(false)">Sign In</button>
+      <button type="button" class="auth-seg-btn" id="tabRegister" onclick="setAuthMode(true)">Create Account</button>
+    </div>
+    
     <div class="login-error" id="loginError" role="alert" aria-live="polite">
       <span id="loginErrorText"></span>
     </div>
+    
     <form id="authForm" onsubmit="handleLogin(event)">
-      <label for="loginUser">Username</label>
+      <!-- Remembered Users on This Device -->
+      <div id="rememberedUsersContainer" class="mb-3 text-start" style="display:none;">
+        <span class="d-block mb-1 text-muted fw-semibold" style="font-size:0.74rem;">QUICK SIGN-IN AS:</span>
+        <div id="rememberedUsersList" class="d-flex flex-wrap gap-1"></div>
+      </div>
+
+      <div class="text-start mb-1">
+        <label for="loginUser" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">USERNAME</label>
+      </div>
       <div class="input-group">
+        <span class="input-group-text"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
         <input type="text" id="loginUser" name="username" class="form-control"
-               placeholder="Your username" autocomplete="username" required
+               placeholder="3–32 letters, numbers or _" autocomplete="username" required
                minlength="3" maxlength="32" pattern="[A-Za-z0-9_]{3,32}"/>
       </div>
-      <label for="loginPass">Password</label>
+      
+      <div class="text-start mb-1">
+        <label for="loginPass" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">PASSWORD</label>
+      </div>
       <div class="input-group">
+        <span class="input-group-text"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
         <input type="password" id="loginPass" name="password" class="form-control"
                placeholder="At least 8 characters" autocomplete="current-password"
-               required minlength="8" maxlength="128"/>
+               required minlength="8" maxlength="128" oninput="updatePasswordMeter(this.value)"/>
       </div>
+
+      <!-- Password Strength Meter (Registration only) -->
+      <div class="password-meter" id="passwordMeter" aria-hidden="true">
+        <div class="password-meter-fill" id="passwordMeterFill"></div>
+      </div>
+      
       <div id="confirmGroup" hidden>
-        <label for="confirmPass">Confirm password</label>
+        <div class="text-start mb-1">
+          <label for="confirmPass" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">CONFIRM PASSWORD</label>
+        </div>
         <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-shield-check" aria-hidden="true"></i></span>
           <input type="password" id="confirmPass" class="form-control"
-                 autocomplete="new-password" minlength="8" maxlength="128" disabled/>
+                 placeholder="Re-type password" autocomplete="new-password" minlength="8" maxlength="128" disabled/>
         </div>
       </div>
-      <label style="display:flex;gap:8px;align-items:center;margin:8px 0 18px">
-        <input type="checkbox" onchange="togglePassword(this.checked)"/> Show password
-      </label>
-      <button class="btn-login" id="authSubmit" type="submit">Sign in</button>
+      
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-1">
+        <label style="display:flex;gap:8px;align-items:center;font-size:0.85rem;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
+          <input type="checkbox" id="showPasswordCheck" aria-label="Show password in plaintext" onchange="togglePassword(this.checked)"/> Show password
+        </label>
+      </div>
+      
+      <button class="btn-login" id="authSubmit" type="submit" disabled>Sign in</button>
     </form>
-    <button type="button" id="authToggle" class="back-link" style="border:0;background:none"
+    
+    <!-- Preserved for backwards compatibility with tests and keyboard navigation -->
+    <button type="button" id="authToggle" class="back-link" style="border:0;background:none;cursor:pointer;"
             onclick="toggleAuthMode()">New here? Create an account</button>
-    <a href="#" class="back-link" onclick="showView('landing')">
-      <i class="fa-solid fa-arrow-left me-1"></i> Back to home
-    </a>
-  </div>
-</div>
-
-
-<!-- ═══ 3. PREDICT ═══ -->
-<div class="view" id="predict">
-  <div class="top-nav">
-    <div class="brand"><i class="fa-solid fa-leaf"></i> CropAdvisor</div>
-    <div class="user-badge">
-      <span><i class="fa-solid fa-user me-1"></i><span id="navUser">User</span></span>
-      <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off me-1"></i>Logout</button>
+    <div>
+      <a href="#" class="back-link" onclick="showView('landing'); return false;">
+        <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Back to home
+      </a>
     </div>
   </div>
+</section>
+
+<!-- ═══ 3. PREDICTION VIEW ═══ -->
+<section class="view" id="predict" role="region" aria-label="Soil and climate input form">
+  <header class="top-nav">
+    <div class="brand">
+      <span class="brand-icon"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span>
+      CropAdvisor
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle-btn" type="button" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <i class="fa-solid fa-moon theme-icon" id="themeIcon" aria-hidden="true"></i>
+      </button>
+      <div class="user-badge">
+        <button class="user-pill user-pill-btn" type="button" onclick="openProfileDrawer()" aria-haspopup="dialog" aria-expanded="false" aria-label="Open User Profile & Past Activity" title="View profile & past predictions">
+          <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+          <span class="user-name-text" id="navUser">User</span>
+          <span class="user-activity-badge" id="navActivityCount" title="Total predictions">0</span>
+        </button>
+        <button class="btn-logout" type="button" onclick="handleLogout()">
+          <i class="fa-solid fa-power-off" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
   <div class="predict-card">
-    <h2><i class="fa-solid fa-flask-vial"></i>Soil & Climate Analysis</h2>
-    <p class="sub-text">Enter soil and climate values for an educational crop recommendation. This does not estimate yield or replace local agronomic advice.</p>
+    <h2><i class="fa-solid fa-flask-vial" aria-hidden="true"></i> Soil & Climate Analysis</h2>
+    <p class="sub-text">Enter field soil measurements and regional atmospheric readings. The multi-class Random Forest model analyzes multi-dimensional suitability across 22 crop labels.</p>
+
+    <!-- Quick Presets Bar -->
+    <div class="preset-strip" role="group" aria-label="Quick test presets">
+      <span class="preset-strip-title"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Sample Presets:</span>
+      <button type="button" class="preset-chip-btn" onclick="applyPreset('rice')">🌾 Rice (Wetland)</button>
+      <button type="button" class="preset-chip-btn" onclick="applyPreset('maize')">🌽 Maize (Temperate)</button>
+      <button type="button" class="preset-chip-btn" onclick="applyPreset('coffee')">☕ Coffee (Highland)</button>
+      <button type="button" class="preset-chip-btn" onclick="applyPreset('grapes')">🍇 Grapes (Dry/High-K)</button>
+      <button type="button" class="preset-chip-btn clear" onclick="applyPreset('clear')"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear</button>
+    </div>
 
     <form id="predictForm" onsubmit="handlePredict(event)">
-      <div class="row g-3">
-        <div class="col-md-4 col-6">
+      <!-- Two-Panel Grouping: Soil Chemistry vs Atmospheric Weather -->
+      <div class="form-groups-grid">
+        
+        <!-- PANEL 1: Soil Chemistry & Nutrients -->
+        <div class="form-group-panel">
+          <div class="group-panel-header">
+            <i class="fa-solid fa-vials" aria-hidden="true"></i>
+            <span>Soil Nutrients & Chemistry</span>
+          </div>
+
+          <!-- Nitrogen -->
           <div class="field-card">
-            <label><i class="fa-solid fa-n"></i> Nitrogen</label>
-            <input type="number" name="Nitrogen" aria-label="Nitrogen" min="0" placeholder="e.g. 90" required step="any"/>
+            <div class="field-card-top">
+              <label for="field-n"><i class="fa-solid fa-n" aria-hidden="true"></i> Nitrogen (N)</label>
+              <span class="field-live-badge" id="badge-n">Ratio in Soil</span>
+            </div>
+            <input type="number" id="field-n" name="Nitrogen" aria-label="Nitrogen ratio in soil"
+                   min="0" placeholder="e.g. 90" required step="any" oninput="updateLiveBadge('n', this.value)"/>
+            <span class="field-hint">Nitrogen ratio content in soil</span>
+          </div>
+
+          <!-- Phosphorus -->
+          <div class="field-card">
+            <div class="field-card-top">
+              <label for="field-p"><i class="fa-solid fa-p" aria-hidden="true"></i> Phosphorus (P)</label>
+              <span class="field-live-badge" id="badge-p">Ratio in Soil</span>
+            </div>
+            <input type="number" id="field-p" name="Phosphorus" aria-label="Phosphorus ratio in soil"
+                   min="0" placeholder="e.g. 42" required step="any" oninput="updateLiveBadge('p', this.value)"/>
+            <span class="field-hint">Phosphorus ratio content in soil</span>
+          </div>
+
+          <!-- Potassium -->
+          <div class="field-card">
+            <div class="field-card-top">
+              <label for="field-k"><i class="fa-solid fa-k" aria-hidden="true"></i> Potassium (K)</label>
+              <span class="field-live-badge" id="badge-k">Ratio in Soil</span>
+            </div>
+            <input type="number" id="field-k" name="Potassium" aria-label="Potassium ratio in soil"
+                   min="0" placeholder="e.g. 43" required step="any" oninput="updateLiveBadge('k', this.value)"/>
+            <span class="field-hint">Potassium ratio content in soil</span>
+          </div>
+
+          <!-- Soil pH -->
+          <div class="field-card">
+            <div class="field-card-top">
+              <label for="field-ph"><i class="fa-solid fa-vial" aria-hidden="true"></i> Soil pH (0–14)</label>
+              <span class="field-live-badge" id="badge-ph">Neutral (6.0–7.5)</span>
+            </div>
+            <input type="number" id="field-ph" name="Ph" aria-label="Soil pH level"
+                   min="0" max="14" placeholder="e.g. 6.5" required step="any" oninput="updateLiveBadge('ph', this.value)"/>
+            <span class="field-hint">Soil acidity/alkalinity scale (0 = acidic, 14 = alkaline)</span>
           </div>
         </div>
-        <div class="col-md-4 col-6">
+
+        <!-- PANEL 2: Atmospheric & Climate Parameters -->
+        <div class="form-group-panel">
+          <div class="group-panel-header">
+            <i class="fa-solid fa-cloud-sun" aria-hidden="true"></i>
+            <span>Atmospheric & Climate Parameters</span>
+          </div>
+
+          <!-- Temperature -->
           <div class="field-card">
-            <label><i class="fa-solid fa-p"></i> Phosphorus</label>
-            <input type="number" name="Phosphorus" aria-label="Phosphorus" min="0" placeholder="e.g. 42" required step="any"/>
+            <div class="field-card-top">
+              <label for="field-temp"><i class="fa-solid fa-temperature-half" aria-hidden="true"></i> Temperature (°C)</label>
+              <span class="field-live-badge" id="badge-temp">Celsius</span>
+            </div>
+            <input type="number" id="field-temp" name="Temperature" aria-label="Temperature in degrees Celsius"
+                   min="-273.15" placeholder="e.g. 20.5" required step="any" oninput="updateLiveBadge('temp', this.value)"/>
+            <span class="field-hint">Average environmental temperature</span>
+          </div>
+
+          <!-- Humidity -->
+          <div class="field-card">
+            <div class="field-card-top">
+              <label for="field-hum"><i class="fa-solid fa-droplet" aria-hidden="true"></i> Relative Humidity (%)</label>
+              <span class="field-live-badge" id="badge-hum">0–100%</span>
+            </div>
+            <input type="number" id="field-hum" name="Humidity" aria-label="Relative humidity percentage"
+                   min="0" max="100" placeholder="e.g. 82" required step="any" oninput="updateLiveBadge('hum', this.value)"/>
+            <span class="field-hint">Relative air moisture saturation percentage</span>
+          </div>
+
+          <!-- Rainfall -->
+          <div class="field-card">
+            <div class="field-card-top">
+              <label for="field-rain"><i class="fa-solid fa-cloud-rain" aria-hidden="true"></i> Rainfall (mm)</label>
+              <span class="field-live-badge" id="badge-rain">Precipitation</span>
+            </div>
+            <input type="number" id="field-rain" name="Rainfall" aria-label="Rainfall in millimeters"
+                   min="0" placeholder="e.g. 200" required step="any" oninput="updateLiveBadge('rain', this.value)"/>
+            <span class="field-hint">Measured or expected rainfall depth in mm</span>
+          </div>
+
+          <!-- Pro Tip Card -->
+          <div class="p-3 rounded-4 mt-3" style="background:var(--surface-card);border:1px dashed var(--surface-input-border);">
+            <div class="d-flex align-items-center gap-2 mb-1" style="font-size:0.8rem;font-weight:700;color:var(--text-brand);">
+              <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+              <span>Agronomic Tip</span>
+            </div>
+            <p class="mb-0 text-muted" style="font-size:0.75rem;line-height:1.5;">
+              Balanced N-P-K ratios support root, shoot, and fruit development. Extreme pH (&lt;5.0 or &gt;8.5) limits nutrient uptake even when nutrients are present.
+            </p>
           </div>
         </div>
-        <div class="col-md-4 col-6">
-          <div class="field-card">
-            <label><i class="fa-solid fa-k"></i> Potassium</label>
-            <input type="number" name="Potassium" aria-label="Potassium" min="0" placeholder="e.g. 43" required step="any"/>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="field-card">
-            <label><i class="fa-solid fa-temperature-half"></i> Temperature °C</label>
-            <input type="number" name="Temperature" aria-label="Temperature" min="-273.15" placeholder="e.g. 25" required step="any"/>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="field-card">
-            <label><i class="fa-solid fa-droplet"></i> Humidity %</label>
-            <input type="number" name="Humidity" aria-label="Humidity" min="0" max="100" placeholder="e.g. 80" required step="any"/>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="field-card">
-            <label><i class="fa-solid fa-vial"></i> pH Level</label>
-            <input type="number" name="Ph" aria-label="Ph" min="0" max="14" placeholder="e.g. 6.5" required step="any"/>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="field-card">
-            <label><i class="fa-solid fa-cloud-rain"></i> Rainfall mm</label>
-            <input type="number" name="Rainfall" aria-label="Rainfall" min="0" placeholder="e.g. 200" required step="any"/>
-          </div>
-        </div>
+
       </div>
+      
       <button type="submit" class="btn-predict" id="btnPredict">
-        <span class="spinner" id="spinner"><i class="fa-solid fa-circle-notch"></i></span>
-        <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles"></i> Predict Crop</span>
+        <span class="spinner" id="spinner"><i class="fa-solid fa-circle-notch" aria-hidden="true"></i></span>
+        <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Predict Suitable Crop</span>
       </button>
     </form>
   </div>
 
-  <div class="history-section" id="historySection" style="display:none;">
-    <h5><i class="fa-solid fa-clock-rotate-left"></i> Your Prediction History</h5>
-    <p>Stored only in this browser. Avoid saving history on shared devices.</p>
-    <div class="history-list" id="historyList"></div>
-    <button class="btn-clear-history" onclick="clearHistory()">
-      <i class="fa-solid fa-trash me-1"></i>Clear History
-    </button>
-  </div>
-</div>
-
-
-<!-- ═══ 4. RESULT (WIDER, SHORTER, LARGER FONTS) ═══ -->
-<div class="view" id="result">
-  <div class="top-nav">
-    <div class="brand"><i class="fa-solid fa-leaf"></i> CropAdvisor</div>
-    <div class="user-badge">
-      <span><i class="fa-solid fa-user me-1"></i><span id="navUser2">User</span></span>
-      <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off me-1"></i>Logout</button>
+  <!-- Local Prediction History -->
+  <section class="history-section" id="historySection" style="display:none;" aria-label="Previous Predictions">
+    <div class="history-header-row">
+      <h5><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Your Prediction History</h5>
+      <input type="text" class="history-search-input" id="historySearch" placeholder="🔍 Filter by crop name…" aria-label="Filter predictions by crop name" oninput="filterHistory(this.value)"/>
     </div>
-  </div>
+    
+    <p class="history-meta">
+      <i class="fa-solid fa-hard-drive" aria-hidden="true"></i>
+      Saved privately on this device only. Sensitive soil inputs remain in your browser storage. Click any entry to re-load into the form.
+    </p>
+    
+    <div class="history-list" id="historyList" role="list"></div>
+    
+    <div class="history-actions">
+      <button type="button" class="btn-clear-history" onclick="clearHistory()">
+        <i class="fa-solid fa-trash me-1" aria-hidden="true"></i>Clear History
+      </button>
+      <button type="button" class="btn-export-history" onclick="exportHistory()">
+        <i class="fa-solid fa-file-arrow-down me-1" aria-hidden="true"></i>Export as CSV
+      </button>
+    </div>
+  </section>
+</section>
+
+<!-- ═══ 4. RESULT VIEW ═══ -->
+<section class="view" id="result" role="region" aria-label="Prediction Result">
+  <header class="top-nav">
+    <div class="brand">
+      <span class="brand-icon"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span>
+      CropAdvisor
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle-btn" type="button" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <i class="fa-solid fa-moon theme-icon" aria-hidden="true"></i>
+      </button>
+      <div class="user-badge">
+        <button class="user-pill user-pill-btn" type="button" onclick="openProfileDrawer()" aria-haspopup="dialog" aria-expanded="false" aria-label="Open User Profile & Past Activity" title="View profile & past predictions">
+          <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+          <span class="user-name-text" id="navUser2">User</span>
+          <span class="user-activity-badge" id="navActivityCount2" title="Total predictions">0</span>
+        </button>
+        <button class="btn-logout" type="button" onclick="handleLogout()">
+          <i class="fa-solid fa-power-off" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
   <div class="result-container">
     <div class="result-badge">
-      <i class="fa-solid fa-circle-check"></i> Prediction Successful
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Analysis Complete
     </div>
-    <div class="result-crop-name" id="cropName"></div>
-    <p class="result-tagline">Best crop for your soil & climate conditions</p>
+    
+    <div class="result-crop-name" id="cropName" role="status" aria-live="polite"></div>
+    <div class="result-category-pill" id="cropCategory">Cereal Grain</div>
+    <p class="result-tagline">Optimal crop match identified from soil chemistry and climate parameters</p>
+    
     <div id="cropImageWrap"></div>
-    <div class="result-details" id="resultDetails"></div>
+    <div class="result-details" id="resultDetails" aria-label="Input summary recap"></div>
 
+    <!-- Action Toolbar -->
     <div class="result-actions">
-      <button class="btn-back" onclick="showView('predict')">
-        <i class="fa-solid fa-flask-vial"></i> New Prediction
+      <button class="btn-back" type="button" onclick="showView('predict')">
+        <i class="fa-solid fa-flask-vial" aria-hidden="true"></i> New Prediction
       </button>
-      <button class="btn-home" onclick="handleLogout()">
-        <i class="fa-solid fa-house"></i> Home
+      <button class="btn-action-outline" type="button" onclick="copyResultSummary()">
+        <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy Summary
       </button>
+      <button class="btn-action-outline" type="button" onclick="window.print()">
+        <i class="fa-solid fa-print" aria-hidden="true"></i> Print Report
+      </button>
+      <button class="btn-home" type="button" onclick="handleLogout()">
+        <i class="fa-solid fa-house" aria-hidden="true"></i> Home
+      </button>
+    </div>
+
+    <!-- How This Works Transparency Section -->
+    <div class="how-it-works">
+      <h6><i class="fa-solid fa-circle-info" aria-hidden="true"></i> How this recommendation works</h6>
+      <p>
+        This prediction was computed by a multi-class Random Forest model (100 estimators) trained on 2,200 agricultural observations across 22 distinct crop varieties. Preprocessing uses stratified feature scaling learned strictly on training partitions to prevent data leakage.
+      </p>
+      <p class="mt-2 text-muted" style="font-size:0.78rem;">
+        <strong>Important Agronomic Scope:</strong> This classifier identifies matching benchmark conditions. In field farming, actual yields depend on soil depth, drainage, seasonal pests, cultivar selection, and local microclimates. Always verify recommendations with certified agricultural extension specialists.
+      </p>
     </div>
   </div>
-</div>
+</section>
 
+<!-- ═══ PROFILE & ACTIVITY DRAWER / MODAL ═══ -->
+<div class="profile-drawer-backdrop" id="profileDrawerBackdrop" onclick="closeProfileDrawer()" aria-hidden="true"></div>
+<aside class="profile-drawer" id="profileDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-label="User Profile and Past Activity">
+  <div class="profile-drawer-header">
+    <div class="d-flex align-items-center gap-3">
+      <div class="profile-avatar" id="drawerAvatar">U</div>
+      <div>
+        <h4 class="profile-drawer-name" id="drawerUsername">Username</h4>
+        <span class="profile-drawer-status"><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i> Active User Profile</span>
+      </div>
+    </div>
+    <button type="button" class="btn-close-drawer" onclick="closeProfileDrawer()" aria-label="Close profile drawer">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </div>
 
-<!-- ═══ JAVASCRIPT ═══ -->
-<script>
-/* ─── SLIDESHOW ────────────────────────────────── */
-(function(){
-  const slides=document.querySelectorAll('.bg-slideshow .slide');
-  const dotsWrap=document.getElementById('slideDots');
-  let current=0;
-  slides.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='dot'+(i===0?' active':'');
-    dotsWrap.appendChild(d);
-  });
-  const dots=dotsWrap.querySelectorAll('.dot');
-  setInterval(()=>{
-    slides[current].classList.remove('active');
-    dots[current].classList.remove('active');
-    current=(current+1)%slides.length;
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
-  },5000);
-})();
+  <!-- Profile Quick Stats -->
+  <div class="drawer-stats-row">
+    <div class="drawer-stat-card">
+      <span class="drawer-stat-val" id="drawerTotalCount">0</span>
+      <span class="drawer-stat-lbl">Predictions</span>
+    </div>
+    <div class="drawer-stat-card">
+      <span class="drawer-stat-val" id="drawerTopCrop">—</span>
+      <span class="drawer-stat-lbl">Top Crop</span>
+    </div>
+    <div class="drawer-stat-card">
+      <span class="drawer-stat-val" id="drawerLastActive">Today</span>
+      <span class="drawer-stat-lbl">Last Active</span>
+    </div>
+  </div>
 
-/* ─── VIEW ─────────────────────────────────────── */
-/* ─── VIEW (With Auto-Reset) ─── */
-function showView(id){
-  if (['predict', 'result'].includes(id) && !currentUser) id = 'login';
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  
-  // If moving to login or predict, clear the forms
-  if(id === 'login') {
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginError').style.display = 'none';
-  }
-  if(id === 'predict') {
-    document.getElementById('predictForm').reset();
-  }
-  
-  window.scrollTo(0,0);
-}
+  <!-- Drawer Nav Tabs -->
+  <div class="drawer-tabs" role="tablist">
+    <button type="button" class="drawer-tab-btn active" id="tabDrawerActivity" onclick="switchDrawerTab('activity')">
+      <i class="fa-solid fa-clock-rotate-left me-1" aria-hidden="true"></i> Past Activity
+    </button>
+    <button type="button" class="drawer-tab-btn" id="tabDrawerAccounts" onclick="switchDrawerTab('accounts')">
+      <i class="fa-solid fa-users me-1" aria-hidden="true"></i> Device Users (<span id="drawerAccountsCount">1</span>)
+    </button>
+  </div>
 
-/* ─── TOAST ────────────────────────────────────── */
-function showToast(msg,type='info'){
-  const icons={success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info'};
-  const t=document.createElement('div');
-  t.className=`custom-toast ${type}`;
-  t.textContent = msg;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),450);},4000);
-}
+  <!-- Tab 1: Past Prediction Activity Timeline -->
+  <div class="drawer-tab-content active" id="drawerTabActivity">
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+      <span class="text-muted fw-bold" style="font-size:0.75rem;letter-spacing:0.5px;">PREDICTION TIMELINE</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn-drawer-mini" onclick="exportHistory()">
+          <i class="fa-solid fa-file-arrow-down me-1" aria-hidden="true"></i> CSV
+        </button>
+        <button type="button" class="btn-drawer-mini text-danger" onclick="clearHistory()">
+          <i class="fa-solid fa-trash me-1" aria-hidden="true"></i> Clear
+        </button>
+      </div>
+    </div>
+    <div class="drawer-activity-feed" id="drawerActivityFeed">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
 
-/* Authentication is verified by Flask; browser storage never authenticates a user. */
-let csrfToken = '';
-let currentUser = null;
-let registering = false;
-function togglePassword(visible) {
-  ['loginPass', 'confirmPass'].forEach(id => {
-    document.getElementById(id).type = visible ? 'text' : 'password';
-  });
-}
-function toggleAuthMode() {
-  registering = !registering;
-  document.getElementById('authForm').reset();
-  togglePassword(false);
-  document.getElementById('authTitle').textContent = registering ? 'Create Account' : 'Welcome Back';
-  document.getElementById('authSubtitle').textContent = registering ? 'Save your account and explore crop recommendations' : 'Sign in to access crop predictions';
-  document.getElementById('authSubmit').textContent = registering ? 'Create account' : 'Sign in';
-  document.getElementById('authToggle').textContent = registering ? 'Already registered? Sign in' : 'New here? Create an account';
-  document.getElementById('confirmGroup').hidden = !registering;
-  document.getElementById('confirmPass').disabled = !registering;
-  document.getElementById('confirmPass').required = registering;
-  document.getElementById('loginPass').autocomplete = registering ? 'new-password' : 'current-password';
-  document.getElementById('loginError').style.display = 'none';
-}
-async function postJSON(url, body = {}) {
-  const response = await fetch(url, {
-    method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken},
-    body: JSON.stringify(body)
-  });
-  const data = await response.json();
-  if (data.csrf_token) csrfToken = data.csrf_token;
-  return {response, data};
-}
-async function handleLogin(event) {
-  event.preventDefault();
-  const button = document.getElementById('authSubmit');
-  const toggle = document.getElementById('authToggle');
-  button.disabled = true;
-  toggle.disabled = true;
-  document.getElementById('loginError').style.display = 'none';
-  try {
-    const {data} = await postJSON(registering ? '/api/register' : '/api/login', {
-      username: document.getElementById('loginUser').value.trim(),
-      password: document.getElementById('loginPass').value,
-      confirm_password: document.getElementById('confirmPass').value
-    });
-    if (!data.success) throw new Error(data.error);
-    currentUser = data.username;
-    document.getElementById('authForm').reset();
-    togglePassword(false);
-    proceedToLogin(currentUser);
-    showToast(`Welcome, ${currentUser}!`, 'success');
-  } catch (error) {
-    document.getElementById('loginErrorText').textContent = error.message || 'Could not sign in. Try again.';
-    document.getElementById('loginError').style.display = 'block';
-  } finally {
-    button.disabled = false;
-    toggle.disabled = false;
-  }
-}
-function proceedToLogin(username) {
-  document.getElementById('navUser').textContent = username;
-  document.getElementById('navUser2').textContent = username;
-  loadHistory();
-  showView('predict');
-}
-async function handleLogout() {
-  try {
-    const {data} = await postJSON('/api/logout');
-    if (!data.success) throw new Error(data.error);
-    currentUser = null;
-    document.getElementById('authForm').reset();
-    document.getElementById('predictForm').reset();
-    document.getElementById('historyList').replaceChildren();
-    document.getElementById('historySection').style.display = 'none';
-    document.getElementById('cropName').textContent = '';
-    document.getElementById('cropImageWrap').replaceChildren();
-    document.getElementById('resultDetails').replaceChildren();
-    showView('landing');
-    showToast('Logged out successfully', 'info');
-  } catch (error) {
-    showToast('Could not sign out. Please try again.', 'error');
-  }
-}
+  <!-- Tab 2: Remembered Device Accounts -->
+  <div class="drawer-tab-content" id="drawerTabAccounts">
+    <div class="mb-3 px-1 text-muted" style="font-size:0.78rem;line-height:1.5;">
+      Previous accounts logged in on this browser. Click "Switch" to quickly sign in as another user.
+    </div>
+    <div class="drawer-accounts-list" id="drawerAccountsList">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
 
-/* ─── PREDICT ──────────────────────────────────── */
-async function handlePredict(e) {
-  e.preventDefault();
+  <!-- Drawer Footer -->
+  <div class="profile-drawer-footer">
+    <button type="button" class="btn-drawer-logout" onclick="closeProfileDrawer(); handleLogout();">
+      <i class="fa-solid fa-power-off me-2" aria-hidden="true"></i> Sign Out
+    </button>
+  </div>
+</aside>
 
-  const btn = document.getElementById('btnPredict');
-  const spinner = document.getElementById('spinner');
-  const btnText = document.getElementById('btnText');
-
-  btn.disabled = true;
-  spinner.classList.add('show');
-  btnText.innerHTML = 'Analyzing…';
-
-  const fd = new FormData(e.target);
-  const body = {};
-  fd.forEach((v, k) => body[k] = v);
-
-  try {
-    const {response, data} = await postJSON('/predict', body);
-    if (response.status === 401) {
-      currentUser = null;
-      showView('login');
-    }
-
-    if (data.success) {
-      document.getElementById('cropName').textContent = data.crop;
-
-      const wrap = document.getElementById('cropImageWrap');
-      if (data.image) {
-        wrap.innerHTML = `<div class="result-img-wrap"><img src="/static/${data.image}" class="img-fluid" alt="${data.crop}"/></div>`;
-      } else {
-        wrap.innerHTML = `<p class="no-img-msg">📷 No image available</p>`;
-      }
-
-      document.getElementById('resultDetails').innerHTML = `
-        <div class="detail-chip"><i class="fa-solid fa-n"></i> N: ${body.Nitrogen}</div>
-        <div class="detail-chip"><i class="fa-solid fa-p"></i> P: ${body.Phosphorus}</div>
-        <div class="detail-chip"><i class="fa-solid fa-k"></i> K: ${body.Potassium}</div>
-        <div class="detail-chip"><i class="fa-solid fa-temperature-half"></i> ${body.Temperature}°C</div>
-        <div class="detail-chip"><i class="fa-solid fa-droplet"></i> ${body.Humidity}%</div>
-        <div class="detail-chip"><i class="fa-solid fa-vial"></i> pH ${body.Ph}</div>
-        <div class="detail-chip"><i class="fa-solid fa-cloud-rain"></i> ${body.Rainfall}mm</div>
-      `;
-
-      showToast(`Recommended: ${data.crop} 🌱`, 'success');
-      saveHistory(body, data.crop);
-      showView('result');
-
-    } else {
-      showToast(`Error: ${data.error}`, 'error');
-    }
-
-  } catch (err) {
-    showToast('Server error — try again', 'error');
-    console.error(err);
-  }
-
-  btn.disabled = false;
-  spinner.classList.remove('show');
-  btnText.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Predict Crop';
-}
-
-/* ─── HISTORY ──────────────────────────────────── */
-/* ─── HISTORY (User Specific) ─── */
-function getHistory() {
-  // Use the currently logged-in username to fetch their specific history
-  const u = currentUser;
-  try {
-    const history = JSON.parse(localStorage.getItem(`crop_history_${u}`) || '[]');
-    return Array.isArray(history) ? history.filter(x => x && typeof x === 'object').slice(0, 20) : [];
-  } catch (_) { return []; }
-}
-
-function setHistory(arr) {
-  const u = currentUser;
-  try { localStorage.setItem(`crop_history_${u}`, JSON.stringify(arr)); }
-  catch (_) { showToast('Prediction history could not be saved in this browser.', 'info'); }
-}
-function saveHistory(inputs,crop){
-  const h=getHistory();
-  h.unshift({
-    crop,n:inputs.Nitrogen,p:inputs.Phosphorus,k:inputs.Potassium,
-    temp:inputs.Temperature,hum:inputs.Humidity,
-    ph:inputs.Ph,rain:inputs.Rainfall,
-    time:new Date().toLocaleString()
-  });
-  if(h.length>20) h.pop();
-  setHistory(h);
-  loadHistory();
-}
-function loadHistory(){
-  const h=getHistory();
-  const sec=document.getElementById('historySection');
-  const list=document.getElementById('historyList');
-  if(!h.length){sec.style.display='none';return;}
-  sec.style.display='block';
-  list.replaceChildren();
-  h.forEach(x => {
-    const item = document.createElement('div'); item.className = 'history-item';
-    const description = document.createElement('div');
-    const crop = document.createElement('div'); crop.className = 'crop';
-    crop.textContent = `🌱 ${x.crop}`;
-    const details = document.createElement('div'); details.className = 'details';
-    details.textContent = `N:${x.n} P:${x.p} K:${x.k} T:${x.temp}°C H:${x.hum}% pH:${x.ph} R:${x.rain}mm`;
-    const time = document.createElement('div'); time.className = 'time'; time.textContent = x.time;
-    description.append(crop, details); item.append(description, time); list.append(item);
-  });
-}
-function clearHistory(){
-  setHistory([]);loadHistory();
-  showToast('History cleared','info');
-}
-
-/* Remove obsolete plaintext credentials; old accounts must register once again. */
-try {
-  ['crop_users_registry', 'crop_logged', 'crop_user'].forEach(key => localStorage.removeItem(key));
-} catch (_) {}
-async function initializeSession() {
-  const button = document.getElementById('authSubmit');
-  button.disabled = true;
-  showView(location.pathname === '/login' ? 'login' : 'landing');
-  try {
-    const response = await fetch('/api/session', {cache: 'no-store'});
-    if (!response.ok) throw new Error('Session unavailable');
-    const data = await response.json();
-    csrfToken = data.csrf_token;
-    currentUser = data.username;
-    if (currentUser) proceedToLogin(currentUser);
-    button.disabled = false;
-  } catch (_) {
-    document.getElementById('loginErrorText').textContent = 'Cannot reach the server. Refresh to retry.';
-    document.getElementById('loginError').style.display = 'block';
-  }
-}
-initializeSession();
-</script>
-
+<!-- Frontend Logic -->
+<script src="/app.js"></script>
 </body>
 </html>

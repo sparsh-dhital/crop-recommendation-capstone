@@ -26,7 +26,33 @@ Open http://127.0.0.1:5000. Flask serves the static frontend locally. The fronte
 8. Set Health Check Path to /health. Check that https://YOUR-SERVICE.onrender.com/health returns {"status":"ok"}.
 9. Save the service URL for the next step.
 
-SQLite accounts require this persistent disk. For a temporary free demo only, omit DATABASE_PATH and the disk; accounts and sessions can disappear on restart/redeployment. For durable free hosting, migrate the account store to an external database first. The deployment in this repository does not implement Postgres.
+SQLite accounts require this persistent disk. For a temporary free demo only, omit DATABASE_PATH and the disk; accounts and sessions can disappear on restart/redeployment. For durable free hosting, use the PostgreSQL backend described below.
+
+## Render with PostgreSQL (recommended for free tier)
+
+Render's free instances have ephemeral file systems, so SQLite data is lost on every deploy/restart. PostgreSQL is the recommended backend for persistent accounts on the free tier.
+
+### Setup
+
+1. In Render, create a **New PostgreSQL** database (free tier is sufficient for a demo).
+2. Copy the **Internal Database URL** from the PostgreSQL dashboard (starts with `postgresql://` or `postgres://`).
+3. Create a **New Web Service** for the Flask backend. Set the environment variables:
+   - `DATABASE_URL` — paste the Internal Database URL from step 2.
+   - `SECRET_KEY` — a random secret: `python -c "import secrets; print(secrets.token_hex(32))"`.
+   - `COOKIE_SECURE=1` — required for HTTPS.
+   - `TRUSTED_PROXY=1` — enables proxy-aware rate limiting (see below).
+4. Build command: `pip install -r backend/requirements.txt`.
+5. Start command: `gunicorn --workers 1 --bind 0.0.0.0:$PORT 'backend.app:create_app()'`.
+6. Set PYTHON_VERSION to 3.12.8. Deploy.
+7. The app auto-creates tables on first startup. No manual migration is needed.
+
+When `DATABASE_URL` is set, the app ignores `DATABASE_PATH` and uses PostgreSQL for all account, session, and rate-limit storage. When `DATABASE_URL` is **not** set, the app falls back to SQLite — no configuration changes are needed for local development.
+
+### Proxy-aware rate limiting (`TRUSTED_PROXY`)
+
+When deployed behind a reverse proxy (Vercel → Render), the backend sees the proxy's IP for every request. Set `TRUSTED_PROXY=1` so the rate limiter reads the original client IP from the `X-Forwarded-For` header (leftmost entry).
+
+> **Security:** Never set `TRUSTED_PROXY=1` when the app is directly internet-facing. An attacker can spoof `X-Forwarded-For` to bypass rate limiting. Only enable it when a trusted edge proxy (Vercel, Cloudflare, etc.) controls the header.
 
 ## Vercel frontend
 
@@ -39,7 +65,7 @@ SQLite accounts require this persistent disk. For a temporary free demo only, om
 
 The Vercel rewrites proxy /api/* and /predict to Render. Requests remain same-origin from the browser's perspective, avoiding cross-site cookie/CORS configuration. The /login path serves index.html. Static images are served by Vercel. API responses are marked no-store.
 
-Render may see Vercel's proxy IP instead of the original browser IP. The demo's IP rate limit can therefore be shared by visitors. Before broader public use, configure a trusted proxy-aware limiter; never blindly trust arbitrary X-Forwarded-For values.
+Render may see Vercel's proxy IP instead of the original browser IP. Set `TRUSTED_PROXY=1` on the Render service to enable proxy-aware rate limiting (see the PostgreSQL section above). Never blindly trust arbitrary X-Forwarded-For values without this explicit opt-in.
 
 ## Testing and retraining
 

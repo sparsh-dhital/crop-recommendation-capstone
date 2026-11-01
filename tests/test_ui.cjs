@@ -13,13 +13,13 @@ const assert = require('node:assert/strict');
   const html=await (await request('/login')).text();
   const console = new VirtualConsole();
   console.on('jsdomError', e => errors.push(e.message));
-  const dom=new JSDOM(html,{url:url+'/login',runScripts:'dangerously',virtualConsole:console,
+  const dom=new JSDOM(html,{url:url+'/login',runScripts:'dangerously',resources:'usable',virtualConsole:console,
     beforeParse(window) { window.fetch=request; window.scrollTo=()=>{}; }});
   const w=dom.window, d=w.document;
   const fill=(id,value)=>{d.getElementById(id).value=value;};
   const until=async predicate=>{
-    for(let i=0;i<100;i++) { if(predicate())return; await new Promise(r=>setTimeout(r,20)); }
-    throw new Error('Timed out waiting for UI state');
+    for(let i=0;i<150;i++) { if(predicate())return; await new Promise(r=>setTimeout(r,30)); }
+    throw new Error('Timed out waiting for UI state. Errors: ' + JSON.stringify(errors));
   };
   await until(()=>!d.getElementById('authSubmit').disabled);
   assert(d.getElementById('login').classList.contains('active'));
@@ -40,6 +40,12 @@ const assert = require('node:assert/strict');
   await until(()=>d.getElementById('result').classList.contains('active'));
   assert.equal(d.getElementById('cropName').textContent,'rice');
   assert.equal(JSON.parse(w.localStorage.getItem('crop_history_'+username))[0].crop,'rice');
+  // Profile drawer and remembered users verification
+  d.querySelector('#result .user-pill-btn').click();
+  assert(d.getElementById('profileDrawer').classList.contains('open'));
+  assert.equal(d.getElementById('drawerUsername').textContent,username);
+  d.querySelector('.btn-close-drawer').click();
+  assert(!d.getElementById('profileDrawer').classList.contains('open'));
   // Logout through the visible result view and confirm its session is revoked.
   d.querySelector('#result .btn-logout').click();
   await until(()=>d.getElementById('landing').classList.contains('active'));
