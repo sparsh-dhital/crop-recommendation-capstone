@@ -40,8 +40,8 @@
   --surface-input-focus: rgba(255, 255, 255, 0.96);
   
   --text-heading: #064e3b;
-  --text-body: #374151;
-  --text-muted: #6b7280;
+  --text-body: #1e293b;
+  --text-muted: #475569;
   --text-brand: #059669;
   
   --shadow-sm: 0 2px 6px rgba(16, 185, 129, 0.08);
@@ -87,9 +87,9 @@
   --surface-input-border: rgba(51, 65, 85, 0.85);
   --surface-input-focus: rgba(15, 23, 42, 0.92);
   
-  --text-heading: #f0fdf4;
+  --text-heading: #f8fafc;
   --text-body: #e2e8f0;
-  --text-muted: #94a3b8;
+  --text-muted: #cbd5e1;
   --text-brand: #34d399;
   
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -2483,4 +2483,281 @@ body {
     color: #059669 !important;
     -webkit-text-fill-color: #059669 !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SITEWIDE TEXT READABILITY & CONTRAST ENHANCEMENTS (WCAG AAA AUDIT)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Form Labels & Placeholders */
+.login-card .form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-heading) !important;
+  letter-spacing: 0.5px;
+}
+
+.show-password-label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.86rem;
+  color: var(--text-body);
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+[data-theme="dark"] .show-password-label {
+  color: #e2e8f0;
+}
+
+.field-card label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .field-card label {
+  color: #f0fdf4 !important;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-body);
+  margin-top: 3px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .field-hint {
+  color: #cbd5e1 !important;
+}
+
+.field-live-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+}
+
+[data-theme="dark"] .field-live-badge {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
+/* Predict View: Pro Tip Card */
+.agronomic-tip-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface-card);
+  border: 1px dashed var(--surface-input-border);
+  margin-top: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.agronomic-tip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 5px;
+}
+
+.agronomic-tip-header i {
+  color: #d97706;
+  font-size: 0.95rem;
+}
+
+.agronomic-tip-body {
+  font-size: 0.81rem !important;
+  line-height: 1.55;
+  color: var(--text-body) !important;
+  margin-bottom: 0 !important;
+}
+
+[data-theme="dark"] .agronomic-tip-card {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="dark"] .agronomic-tip-header {
+  color: #f0fdf4 !important;
+}
+
+[data-theme="dark"] .agronomic-tip-header i {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .agronomic-tip-body {
+  color: #cbd5e1 !important;
+}
+
+/* Result View: Radiant Crop Heading & High Contrast Details in Dark Mode */
+[data-theme="dark"] .result-crop-name {
+  background: linear-gradient(135deg, #34d399 0%, #a7f3d0 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  filter: drop-shadow(0 2px 14px rgba(52, 211, 153, 0.3));
+}
+
+[data-theme="dark"] .result-tagline {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .result-category-pill {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
+[data-theme="dark"] .result-details .detail-chip {
+  background: rgba(30, 41, 59, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .result-details .detail-chip i {
+  color: #34d399 !important;
+}
+
+/* Prediction History Readability */
+.history-meta {
+  color: var(--text-body);
+}
+
+[data-theme="dark"] .history-meta {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .history-item {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .history-item .crop {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .history-item .details {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .history-item .time {
+  color: #94a3b8 !important;
+}
+
+/* Profile Drawer High Contrast */
+[data-theme="dark"] .profile-drawer {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="dark"] .profile-drawer-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .profile-drawer-status {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .drawer-stat-card {
+  background: rgba(30, 41, 59, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .drawer-stat-val {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .drawer-stat-lbl {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .drawer-act-item {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .drawer-act-crop {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .drawer-act-details {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .drawer-act-time {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .drawer-tab-btn {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .drawer-tab-btn.active {
+  background: rgba(51, 65, 85, 0.85) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .account-info-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .account-info-meta {
+  color: #cbd5e1 !important;
+}
+
+/* Landing Page Hero & Bento Cards */
+[data-theme="dark"] .landing-card h1 .gradient-text {
+  background: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+[data-theme="dark"] .landing-card .tagline {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .landing-card .hero-desc {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .bento-stat-item {
+  background: rgba(30, 41, 59, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .bento-stat-num {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .bento-stat-label {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .feature-pills .pill {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+  color: #a7f3d0 !important;
+}
+
+.login-card .back-link {
+  color: var(--text-body);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .login-card .back-link {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .login-card .back-link:hover {
+  color: #34d399;
 }

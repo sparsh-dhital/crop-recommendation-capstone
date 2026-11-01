@@ -117,12 +117,12 @@
     <form id="authForm" onsubmit="handleLogin(event)">
       <!-- Remembered Users on This Device -->
       <div id="rememberedUsersContainer" class="mb-3 text-start" style="display:none;">
-        <span class="d-block mb-1 text-muted fw-semibold" style="font-size:0.74rem;">QUICK SIGN-IN AS:</span>
+        <span class="d-block mb-1 fw-bold text-uppercase" style="font-size:0.78rem;color:var(--text-heading);letter-spacing:0.5px;">Quick sign-in as:</span>
         <div id="rememberedUsersList" class="d-flex flex-wrap gap-1"></div>
       </div>
 
       <div class="text-start mb-1">
-        <label for="loginUser" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">USERNAME</label>
+        <label for="loginUser" class="form-label">USERNAME</label>
       </div>
       <div class="input-group">
         <span class="input-group-text"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
@@ -132,7 +132,7 @@
       </div>
       
       <div class="text-start mb-1">
-        <label for="loginPass" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">PASSWORD</label>
+        <label for="loginPass" class="form-label">PASSWORD</label>
       </div>
       <div class="input-group">
         <span class="input-group-text"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
@@ -148,7 +148,7 @@
       
       <div id="confirmGroup" hidden>
         <div class="text-start mb-1">
-          <label for="confirmPass" class="form-label fw-bold" style="font-size:0.8rem;color:var(--text-brand);">CONFIRM PASSWORD</label>
+          <label for="confirmPass" class="form-label">CONFIRM PASSWORD</label>
         </div>
         <div class="input-group">
           <span class="input-group-text"><i class="fa-solid fa-shield-check" aria-hidden="true"></i></span>
@@ -158,7 +158,7 @@
       </div>
       
       <div class="d-flex justify-content-between align-items-center mb-3 mt-1">
-        <label style="display:flex;gap:8px;align-items:center;font-size:0.85rem;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
+        <label class="show-password-label">
           <input type="checkbox" id="showPasswordCheck" aria-label="Show password in plaintext" onchange="togglePassword(this.checked)"/> Show password
         </label>
       </div>
@@ -313,12 +313,12 @@
           </div>
 
           <!-- Pro Tip Card -->
-          <div class="p-3 rounded-4 mt-3" style="background:var(--surface-card);border:1px dashed var(--surface-input-border);">
-            <div class="d-flex align-items-center gap-2 mb-1" style="font-size:0.8rem;font-weight:700;color:var(--text-brand);">
+          <div class="agronomic-tip-card">
+            <div class="agronomic-tip-header">
               <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
               <span>Agronomic Tip</span>
             </div>
-            <p class="mb-0 text-muted" style="font-size:0.75rem;line-height:1.5;">
+            <p class="agronomic-tip-body">
               Balanced N-P-K ratios support root, shoot, and fruit development. Extreme pH (&lt;5.0 or &gt;8.5) limits nutrient uptake even when nutrients are present.
             </p>
           </div>
@@ -475,7 +475,7 @@
   <!-- Tab 1: Past Prediction Activity Timeline -->
   <div class="drawer-tab-content active" id="drawerTabActivity">
     <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-      <span class="text-muted fw-bold" style="font-size:0.75rem;letter-spacing:0.5px;">PREDICTION TIMELINE</span>
+      <span class="fw-bold" style="font-size:0.78rem;letter-spacing:0.5px;color:var(--text-heading);">PREDICTION TIMELINE</span>
       <div class="d-flex gap-2">
         <button type="button" class="btn-drawer-mini" onclick="exportHistory()">
           <i class="fa-solid fa-file-arrow-down me-1" aria-hidden="true"></i> CSV
@@ -492,7 +492,7 @@
 
   <!-- Tab 2: Remembered Device Accounts -->
   <div class="drawer-tab-content" id="drawerTabAccounts">
-    <div class="mb-3 px-1 text-muted" style="font-size:0.78rem;line-height:1.5;">
+    <div class="mb-3 px-1" style="font-size:0.82rem;line-height:1.5;color:var(--text-body);">
       Previous accounts logged in on this browser. Click "Switch" to quickly sign in as another user.
     </div>
     <div class="drawer-accounts-list" id="drawerAccountsList">
