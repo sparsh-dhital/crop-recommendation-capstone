@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Deployment update
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the current folder layout and Render + Vercel instructions.
@@ -100,3 +101,6 @@ The original unused `minmaxscaler.pkl`, `standscaler.pkl`, `get-pip.py` and empt
 Built on this team's existing Crop-Recommendation-System repository. Uses Flask/Werkzeug, NumPy, pandas, scikit-learn and Matplotlib. The interface uses Bootstrap, Font Awesome, Google Fonts and external background images, which need internet access. Confirm licenses/attribution for the supplied CSV and images before redistribution. AI-assisted code changes must be reviewed and understood by all team members, as required by the faculty guidelines.
 
 For the optional DOM integration test, install Node.js 20+ and run `npm install`, then `python tests/run_ui.py` with the Python environment activated. This starts a server on port 5051 with a temporary database and exercises the rendered page's JavaScript against Flask. It checks registration/mismatch, prediction/history, logout and both wrong/correct login. This is DOM integration testing, not a substitute for visual testing in a real browser.
+=======
+# crop-recommendation-capstone
+>>>>>>> 627478054399083bf0e365644856d41715c79a1d
